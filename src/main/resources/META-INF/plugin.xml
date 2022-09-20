@@ -1,0 +1,95 @@
+<idea-plugin>
+    <id>com.demo.plugin.GenerateCode</id>
+    <name>GenerateCode</name>
+    <vendor email="wangyujie2333@163.com">wangyujie</vendor>
+
+    <description>
+        <![CDATA[
+        <h2>the plugin can help you to complete repetitive work on some of the work, including not limited to</h2>
+        <h2>1、to create a repeatable execute sql script</h2>
+        <h2>2、according to the table to generate  java file,mybatis file</h2>
+        <a href="https://github.com/wangyujie2333/GenerateCode">Generate Code source code and document</a><br>
+        ]]>
+    </description>
+
+    <change-notes><![CDATA[
+    ]]>
+    </change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.database</depends>
+
+    <idea-version since-build="193.5233.102"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.idea.plugin.setting.ToolSettings"/>
+        <projectConfigurable dynamic="true" id="Generate。Code" groupId="tools" displayName="Generate Code" instance="com.idea.plugin.window.SettingFactory"/>
+        <typedHandler implementation="com.idea.plugin.charreplace.ChineseCharReplaceHandler" id="ChineseCharReplaceHandler"/>
+        <editorActionHandler action="EditorPaste" implementationClass="com.idea.plugin.image.PasteImageHandler" order="first"/>
+        <completion.contributor language="MARKDOWN" order="first" implementationClass="com.idea.plugin.completion.CodeCompletionContributor"/>
+    </extensions>
+
+    <actions>
+        <group id="GenerateCode.Group.Main" text="GenerateCode"
+               description="Group of generate code"
+               popup="true"
+               icon="/img/pluginIcon.svg">
+            <action id="CreateDemoFile" class="com.idea.plugin.popup.DemoFilePopupAction"
+                    text="DemoFile" description="Create demo file" icon="/img/icon-demo.svg">
+            </action>
+            <action id="EditorCreateSqlFile" class="com.idea.plugin.popup.SqlFilePopupAction"
+                    text="SqlFile" description="Create sql file" icon="/img/icon-database.svg">
+            </action>
+            <action id="CreateJavaFile" class="com.idea.plugin.popup.JavaFilePopupAction"
+                    text="JavaFile" description="Create java file" icon="/img/icon-java.svg">
+            </action>
+            <action id="WordChangeAction" class="com.idea.plugin.popup.WordChangeAction"
+                    text="WordChange" description="Word operation action" icon="/img/icon-string.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift X"/>
+            </action>
+            <action id="ReportAction" class="com.idea.plugin.popup.ReportAction"
+                    text="Report" description="Create report file" icon="/img/icon-report.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
+            </action>
+            <action id="GenerateAllDataAction" class="com.idea.plugin.popup.GenerateAllDataAction"
+                    text="GenerateAllData" description="Generate all data action" icon="/img/icon-set.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift Q"/>
+            </action>
+            <action id="GenerateAllSetAction" class="com.idea.plugin.popup.GenerateAllSetAction"
+                    text="GenerateAllSet" description="Generate all set action" icon="/img/icon-set.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift W"/>
+            </action>
+            <action id="JavaDocAction" class="com.idea.plugin.popup.JavaDocAction"
+                    text="JavaDoc" description="Java doc action" icon="/img/icon-doc.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift D"/>
+            </action>
+            <action id="JavaLogAction" class="com.idea.plugin.popup.JavaLogAction"
+                    text="JavaLog" description="Java log action" icon="/img/icon-doc.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift G"/>
+            </action>
+            <action id="JsonAction" class="com.idea.plugin.popup.JsonAction"
+                    text="TextFormat" description="Text format" icon="/img/icon-json.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift J"/>
+            </action>
+        </group>
+        <action id="Copy Build File" class="com.idea.plugin.popup.CopyBuildFileAction" text="Copy Build File"
+                description="Copy Build File">
+            <add-to-group group-id="CopyReferencePopupGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift C"/>
+        </action>
+        <group id="GenerateCode.group" text="Coding Easier"
+               description="Coding Easier plugin"
+               icon="/img/pluginIcon.svg"
+               popup="false">
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="EditorToggleColumnMode"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="CutCopyPasteGroup"/>
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <separator/>
+            <reference ref="GenerateCode.Group.Main"></reference>
+        </group>
+    </actions>
+
+</idea-plugin>
