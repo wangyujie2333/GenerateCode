@@ -1,7 +1,7 @@
 package com.idea.plugin.sql.oracle;
 
-import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.AbstractProcedureService;
+import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.support.GeneralSqlInfoVO;
 import com.idea.plugin.sql.support.IndexInfoVO;
 import com.idea.plugin.sql.support.SqlTemplateModeule;
@@ -16,10 +16,10 @@ public class OracleProcedureAddIndexService extends BaseProcedureService {
         if (StringUtils.isEmpty(path) || CollectionUtils.isEmpty(tableSqlInfoVO.getIndexInfos())) {
             return;
         }
-        AbstractProcedureService procedureService =sqlTemplateVO.getProcedureService();
+        AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         if (sqlTemplateVO.isMerge()) {
             if (tableSqlInfoVO.getIsMergeAddIndexStart()) {
-                FileUtils.writeFile(path, procedureService.comment());
+                FileUtils.writeFile(path, procedureService.getPComment(generalSqlInfoVO));
                 FileUtils.writeFile(path, procedureService.procedure());
             }
             FileUtils.writeFile(path, procedureService.comment());

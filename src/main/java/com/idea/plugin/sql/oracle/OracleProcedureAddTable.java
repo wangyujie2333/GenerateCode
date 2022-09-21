@@ -22,13 +22,6 @@ public class OracleProcedureAddTable extends AbstractProcedureService {
     public static String addTableCall = "                %s %s%s";
     public static String addTableCallComment = "        EXECUTE IMMEDIATE  'COMMENT ON COLUMN %s.%s IS ''%s''';";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

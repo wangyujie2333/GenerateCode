@@ -42,6 +42,7 @@ public class JavaSetGetUI extends DialogWrapper {
         javaSetGetVO.setIsSGInner(isSGInner.isSelected());
         return javaSetGetVO;
     }
+
     public void setJavaSetGetVO() {
         JavaSetGetVO javaSetGetVO = JavaSetGetVO.getInstance();
         isNoneConstructor.setSelected(javaSetGetVO.getIsNoneConstructor());

@@ -293,7 +293,7 @@ public class GeneratorXmlFileStrService {
                     } else {
                         String conditon = context.getTableInfoVO().getFieldInfos().stream().map(fieldInfoVO -> {
                             JDBCType jtype = fieldInfoVO.getColumnType().getJtype();
-                            String fieldName = StringUtil.textToCamelCase(fieldInfoVO.getColumnName(),false);
+                            String fieldName = StringUtil.textToCamelCase(fieldInfoVO.getColumnName(), false);
                             String conditions;
                             String test;
                             if (JavaTypeEnum.DATE_TYPE.equals(fieldInfoVO.getColumnType())) {

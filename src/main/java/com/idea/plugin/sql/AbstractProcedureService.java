@@ -6,6 +6,10 @@ import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
 import com.idea.plugin.sql.support.enums.DataProcedureTypeEnum;
 import com.idea.plugin.sql.support.enums.DataTypeEnum;
+import com.idea.plugin.sql.support.enums.ProcedureTypeEnum;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Optional;
 
 public abstract class AbstractProcedureService implements IProcedureService {
 
@@ -47,10 +51,14 @@ public abstract class AbstractProcedureService implements IProcedureService {
 
     @Override
     public String getComment() {
-        if (sqlTemplateModeule.getSqlTemplate().isPresent()) {
-            return sqlTemplateModeule.getSqlTemplate().get().getComment();
-        }
-        return null;
+        return comment;
+    }
+
+    public String getPComment(GeneralSqlInfoVO generalSqlInfoVO) {
+        ProcedureTypeEnum procedureTypeEnum = generalSqlInfoVO.getProcedureTypeEnum();
+        DataTypeEnum dataType = generalSqlInfoVO.getDataType();
+        String comment = procedureTypeEnum.getName();
+        return "\n-- " + dataType.name() + ' ' + comment + "\n";
     }
 
     @Override

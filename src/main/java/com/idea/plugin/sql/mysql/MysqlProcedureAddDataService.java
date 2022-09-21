@@ -1,7 +1,7 @@
 package com.idea.plugin.sql.mysql;
 
-import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.AbstractProcedureService;
+import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.support.GeneralSqlInfoVO;
 import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
@@ -17,7 +17,7 @@ public class MysqlProcedureAddDataService extends BaseProcedureService {
         if (StringUtils.isEmpty(path)) {
             return;
         }
-        AbstractProcedureService procedureService =sqlTemplateVO.getProcedureService();
+        AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         FileUtils.writeFile(path, procedureService.comment());
         String[] columnNameArr = tableSqlInfoVO.insertColumnName.split(",");
         String columnNameDeclare = Arrays.stream(columnNameArr)

@@ -19,13 +19,6 @@ public class MysqlProcedureAddIndex extends AbstractProcedureService {
     public static String addIndexCall = "CALL ADD_${shortName}_INDEX('${tableName}', '${indexName}', '${indexColumnName}');\n";
     public static String addIndexDrop = "\nDROP PROCEDURE ADD_${shortName}_INDEX;\n\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

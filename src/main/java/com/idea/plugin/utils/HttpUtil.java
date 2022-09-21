@@ -10,7 +10,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +37,7 @@ public class HttpUtil {
         CloseableHttpResponse response = null;
         try {
             httpclient = HttpClients.createDefault();
-             HttpGet httpGet = new HttpGet(url);
+            HttpGet httpGet = new HttpGet(url);
             httpGet.setConfig(RequestConfig.custom().setSocketTimeout(SOCKET_TIMEOUT).setConnectTimeout(CONNECT_TIMEOUT).build());
             response = httpclient.execute(httpGet);
             result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);

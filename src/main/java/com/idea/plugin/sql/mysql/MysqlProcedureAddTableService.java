@@ -1,7 +1,7 @@
 package com.idea.plugin.sql.mysql;
 
-import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.AbstractProcedureService;
+import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.support.GeneralSqlInfoVO;
 import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
@@ -19,7 +19,7 @@ public class MysqlProcedureAddTableService extends BaseProcedureService {
         if (StringUtils.isEmpty(path) || CollectionUtils.isEmpty(tableSqlInfoVO.getFieldInfos())) {
             return;
         }
-        AbstractProcedureService procedureService =sqlTemplateVO.getProcedureService();
+        AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         FileUtils.writeFile(path, procedureService.comment());
         String procedure = procedureService.getProcedure();
         Integer length = tableSqlInfoVO.getFieldInfos().stream().map(fieldInfo -> fieldInfo.columnName.length()).max(Comparator.comparing(Integer::intValue)).get();

@@ -1,0 +1,49 @@
+{
+  "sqlTemplates": [
+    {
+      "procedureType": "ADD_COLUMN",
+      "param": "comment shortName tableName columnName columnType nullType fcomment indexName indexColumnName",
+      "isMerge": true,
+      "comment": "新增内置列",
+      "mysql": {
+        "procedure": "DROP PROCEDURE IF EXISTS ADD_${shortName}_COLUMN;\nDELIMITER $$\nCREATE PROCEDURE ADD_${shortName}_COLUMN(V_TABLE_NAME TINYTEXT, V_COLUMN_NAME TINYTEXT, V_COLUMN_TYPE TINYTEXT, V_COMMENT TINYTEXT)\nBEGIN\n    BEGIN\n        SET @STR = concat('ALTER TABLE ', V_TABLE_NAME, '  ADD ', V_COLUMN_NAME, ' ', V_COLUMN_TYPE, ' COMMENT ''', V_COMMENT, '''');\n        SELECT count(1) INTO @CNT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = V_TABLE_NAME AND COLUMN_NAME = V_COLUMN_NAME AND TABLE_SCHEMA = DATABASE();\n        IF @CNT = 0 THEN PREPARE STMT FROM @STR; EXECUTE STMT; END IF;\n    END;\nEND$$\nDELIMITER ;\n",
+        "call": "CALL ADD_${shortName}_COLUMN('${tableName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n",
+        "drop": "\nDROP PROCEDURE ADD_${shortName}_COLUMN;\n\n"
+      },
+      "oracle": {
+        "procedure": "CREATE OR REPLACE PROCEDURE ADD_${shortName}_COLUMN(V_TABLE_NAME IN VARCHAR, V_COLUMN_NAME IN VARCHAR, V_COLUMN_TYPE IN VARCHAR, V_COMMENT IN VARCHAR) AS\n    V_T_COUNT NUMBER;\nBEGIN\n    SELECT count(1) INTO V_T_COUNT FROM USER_TAB_COLUMNS WHERE TABLE_NAME = V_TABLE_NAME AND COLUMN_NAME = V_COLUMN_NAME;\n    IF V_T_COUNT = 0 THEN\n        EXECUTE IMMEDIATE 'ALTER TABLE ' || V_TABLE_NAME || ' ADD ' || V_COLUMN_NAME || ' ' || V_COLUMN_TYPE;\n        EXECUTE IMMEDIATE 'COMMENT ON COLUMN ' || V_TABLE_NAME || '.' || V_COLUMN_NAME || ' IS ''' || V_COMMENT || '''';\n    END IF;\nEND ;\n/\n",
+        "call": "CALL ADD_${shortName}_COLUMN('${tableName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n",
+        "drop": "\nDROP PROCEDURE ADD_${shortName}_COLUMN;\n\n"
+      }
+    },
+    {
+      "procedureType": "ADD_INDEX",
+      "isMerge": true,
+      "mysql": {
+        "procedure":"DROP PROCEDURE IF EXISTS ADD_${shortName}_INDEX;\nDELIMITER $$\nCREATE PROCEDURE ADD_${shortName}_INDEX(V_TABLE_NAME TINYTEXT, V_INDEX_NAME TINYTEXT, V_COLUMN_NAME TINYTEXT)\nBEGIN\n    BEGIN\n        SET @STR = concat('CREATE INDEX ', V_INDEX_NAME, ' ON ', V_TABLE_NAME, ' (', V_COLUMN_NAME, ')');\n        SELECT count(1) INTO @CNT FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = V_TABLE_NAME AND INDEX_NAME = V_INDEX_NAME AND TABLE_SCHEMA = DATABASE();\n        IF @CNT = 0 THEN PREPARE STMT FROM @STR; EXECUTE STMT; END IF;\n    END;\nEND$$\nDELIMITER ;\n",
+        "call":"CALL ADD_${shortName}_INDEX('${tableName}', '${indexName}', '${indexColumnName}');\n",
+        "drop":"\nDROP PROCEDURE ADD_${shortName}_INDEX;\n\n"
+      },
+      "oracle": {
+        "procedure":"CREATE OR REPLACE PROCEDURE ADD_${shortName}_INDEX(V_TABLE_NAME IN VARCHAR, V_INDEX_NAME IN VARCHAR, V_COLUMN_NAME IN VARCHAR) AS\n    V_T_COUNT NUMBER;\nBEGIN\n    SELECT count(1) INTO V_T_COUNT FROM USER_INDEXES WHERE TABLE_NAME = V_TABLE_NAME AND INDEX_NAME = V_INDEX_NAME;\n    IF V_T_COUNT = 0 THEN EXECUTE IMMEDIATE 'CREATE INDEX ' || V_INDEX_NAME || ' ON ' || V_TABLE_NAME || ' (' || V_COLUMN_NAME || ')'; END IF;\nEND ;\n/\n",
+        "call":"CALL ADD_${shortName}_INDEX('${tableName}', '${indexName}', '${indexColumnName}');\n",
+        "drop":"\nDROP PROCEDURE ADD_${shortName}_INDEX;\n\n"
+      }
+    },
+    {
+      "procedureType": "MODIFY_COLUMN",
+      "isMerge": true,
+      "comment": "修改内置列",
+      "mysql": {
+        "procedure":"DROP PROCEDURE IF EXISTS MODIFY_${shortName}_COLUMN;\nDELIMITER $$\nCREATE PROCEDURE MODIFY_${shortName}_COLUMN(V_TABLE_NAME TINYTEXT, V_COLUMN_NAME TINYTEXT, V_COLUMN_TYPE TINYTEXT, V_COMMENT TINYTEXT)\nBEGIN\n    BEGIN\n        SET @STR = concat('ALTER TABLE ', V_TABLE_NAME, '  MODIFY ', V_COLUMN_NAME, ' ', V_COLUMN_TYPE, ' COMMENT ''', V_COMMENT, '''');\n        SELECT count(1) INTO @CNT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = V_TABLE_NAME AND COLUMN_NAME = V_COLUMN_NAME AND TABLE_SCHEMA = DATABASE();\n        IF @CNT = 1 THEN PREPARE STMT FROM @STR; EXECUTE STMT; END IF;\n    END;\nEND$$\nDELIMITER ;\n",
+        "call":"CALL MODIFY_${shortName}_COLUMN('${shortName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n",
+        "drop":"\nDROP PROCEDURE MODIFY_${shortName}_COLUMN;\n\n"
+      },
+      "oracle": {
+        "procedure":"CREATE OR REPLACE PROCEDURE MODIFY_${shortName}_COLUMN(V_TABLE_NAME IN VARCHAR, V_COLUMN_NAME IN VARCHAR, V_COLUMN_TYPE IN VARCHAR, V_COMMENT IN VARCHAR) AS\n    V_T_COUNT NUMBER;\nBEGIN\n    SELECT count(1) INTO V_T_COUNT FROM USER_TAB_COLUMNS WHERE TABLE_NAME = V_TABLE_NAME AND COLUMN_NAME = V_COLUMN_NAME;\n    IF V_T_COUNT = 1 THEN\n        EXECUTE IMMEDIATE 'ALTER TABLE ' || V_TABLE_NAME || ' MODIFY ' || V_COLUMN_NAME || ' ' || V_COLUMN_TYPE;\n        EXECUTE IMMEDIATE 'COMMENT ON COLUMN ' || V_TABLE_NAME || '.' || V_COLUMN_NAME || ' IS ''' || V_COMMENT || '''';\n    END IF;\nEND ;\n/\n",
+        "call":"CALL MODIFY_${shortName}_COLUMN('${shortName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n",
+        "drop":"\nDROP PROCEDURE MODIFY_${shortName}_COLUMN;\n\n"
+      }
+    }
+  ]
+}

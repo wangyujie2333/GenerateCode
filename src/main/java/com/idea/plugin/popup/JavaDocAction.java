@@ -2,13 +2,7 @@ package com.idea.plugin.popup;
 
 import com.idea.plugin.document.JavaDocService;
 import com.idea.plugin.utils.NoticeUtil;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationActivationListener;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Disposer;
-import com.intellij.util.messages.MessageBusConnection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

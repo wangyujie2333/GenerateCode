@@ -25,13 +25,6 @@ public class OracleProcedureAddData extends AbstractProcedureService {
     public static String insertDataCall = "CALL INSERT_%s_DATA();\n\n";
     public static String insertDataDrop = "DROP PROCEDURE INSERT_%s_DATA;\n\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

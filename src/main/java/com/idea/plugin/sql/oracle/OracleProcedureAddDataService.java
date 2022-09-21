@@ -1,7 +1,7 @@
 package com.idea.plugin.sql.oracle;
 
-import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.AbstractProcedureService;
+import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.support.GeneralSqlInfoVO;
 import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
@@ -17,7 +17,7 @@ public class OracleProcedureAddDataService extends BaseProcedureService {
         if (StringUtils.isEmpty(path)) {
             return;
         }
-        AbstractProcedureService procedureService =sqlTemplateVO.getProcedureService();
+        AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         FileUtils.writeFile(path, procedureService.comment());
         String[] columnNameArr = tableSqlInfoVO.insertColumnName.split(",");
         String columnNameValue = Arrays.stream(Arrays.copyOfRange(columnNameArr, 1, columnNameArr.length))

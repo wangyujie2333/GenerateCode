@@ -9,13 +9,6 @@ public class MysqlProcedureInsertData extends AbstractProcedureService {
                     "SELECT %s FROM DUAL\n" +
                     "WHERE NOT exists(SELECT 1 FROM %s T WHERE T.%s = %s);\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

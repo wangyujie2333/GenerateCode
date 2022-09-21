@@ -1,7 +1,5 @@
 package com.idea.plugin.text.json.json5;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;

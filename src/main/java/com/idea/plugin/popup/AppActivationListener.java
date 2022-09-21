@@ -36,7 +36,7 @@ public class AppActivationListener implements ApplicationActivationListener {
                         dp.browse(URI.create("https://github.com/wangyujie2333/GenerateCode"));
                     }
                 } catch (Exception ex) {
-                    NoticeUtil.error("打开链接失败:https://github.com/wangyujie2333/GenerateCode",ex);
+                    NoticeUtil.error("打开链接失败:https://github.com/wangyujie2333/GenerateCode", ex);
                 }
             }
         });

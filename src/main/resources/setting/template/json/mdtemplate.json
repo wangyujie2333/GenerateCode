@@ -1,0 +1,13 @@
+{
+  "templateTask": [
+    {
+      "taskName": "need.wyj.md",
+      "filePath": "/design",
+      "templatePath": {
+        "head": "/template/design/designhead.md",
+        "body": "/template/design/designbody.md",
+        "tail": "/template/design/designtail.md"
+      }
+    }
+  ]
+}
