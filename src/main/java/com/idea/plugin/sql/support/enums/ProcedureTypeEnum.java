@@ -7,27 +7,27 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ProcedureTypeEnum {
-    INITIAL("",FileDDLTypeEnum.INITIAL, Collections.emptyList()),
-    ADD_TABLE("新增内置表",FileDDLTypeEnum.CREATE, Arrays.asList(
+    INITIAL("", FileDDLTypeEnum.INITIAL, Collections.emptyList()),
+    ADD_TABLE("新增内置表", FileDDLTypeEnum.CREATE, Arrays.asList(
             "tableName",
             "fieldInfos")),
-    ADD_INDEX("新增内置索引",FileDDLTypeEnum.ALTER, Arrays.asList(
+    ADD_INDEX("新增内置索引", FileDDLTypeEnum.ALTER, Arrays.asList(
             "tableName",
             "indexInfos")),
-    ADD_COLUMN("新增内置列",FileDDLTypeEnum.ALTER, Arrays.asList(
+    ADD_COLUMN("新增内置列", FileDDLTypeEnum.ALTER, Arrays.asList(
             "tableName",
             "fieldInfos")),
-    MODIFY_COLUMN("修改内置列",FileDDLTypeEnum.ALTER, Arrays.asList(
+    MODIFY_COLUMN("修改内置列", FileDDLTypeEnum.ALTER, Arrays.asList(
             "tableName",
             "fieldInfos")),
-    ADD_DATA("新增内置数据",FileDDLTypeEnum.INSERT, Arrays.asList(
+    ADD_DATA("新增内置数据", FileDDLTypeEnum.INSERT, Arrays.asList(
             "tableName",
             "insertColumnName",
             "insertColumnParam")),
-    INSERT_DATA("新增内置数据",FileDDLTypeEnum.INSERT, Arrays.asList(
+    INSERT_DATA("新增内置数据", FileDDLTypeEnum.INSERT, Arrays.asList(
             "tableName",
             "insertData")),
-    INSERT_SQL("新增内置数据",FileDDLTypeEnum.INSERT, Arrays.asList(
+    INSERT_SQL("新增内置数据", FileDDLTypeEnum.INSERT, Arrays.asList(
             "jdbcUrl",
             "username",
             "dbpasswd",
@@ -43,7 +43,7 @@ public enum ProcedureTypeEnum {
     private FileCreateTypeEnum fileCreateType;
     private List<String> mustFieldList;
 
-    ProcedureTypeEnum(String name,FileDDLTypeEnum fileType, List<String> mustFieldList) {
+    ProcedureTypeEnum(String name, FileDDLTypeEnum fileType, List<String> mustFieldList) {
         this.name = name;
         this.fileType = fileType;
         this.mustFieldList = mustFieldList;

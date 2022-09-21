@@ -5,7 +5,7 @@ import ${import};
 </#list>
 
 /**
-* ${comment}控制层类
+* ${comment}
 *
 * @author ${author}
 * @date ${date}

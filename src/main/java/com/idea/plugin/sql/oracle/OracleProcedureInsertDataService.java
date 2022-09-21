@@ -1,7 +1,7 @@
 package com.idea.plugin.sql.oracle;
 
-import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.AbstractProcedureService;
+import com.idea.plugin.sql.BaseProcedureService;
 import com.idea.plugin.sql.support.GeneralSqlInfoVO;
 import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
@@ -20,7 +20,7 @@ public class OracleProcedureInsertDataService extends BaseProcedureService {
         if (StringUtils.isEmpty(path) || CollectionUtils.isEmpty(tableSqlInfoVO.insertData)) {
             return;
         }
-        AbstractProcedureService procedureService =sqlTemplateVO.getProcedureService();
+        AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         FileUtils.writeFile(path, procedureService.comment());
         Pattern pattern = Pattern.compile("^'\\d{4}-\\d{2}-\\d{2}");
         for (String insertSql : tableSqlInfoVO.insertData) {

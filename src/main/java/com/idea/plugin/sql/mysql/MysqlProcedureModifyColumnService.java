@@ -19,7 +19,7 @@ public class MysqlProcedureModifyColumnService extends BaseProcedureService {
         AbstractProcedureService procedureService = sqlTemplateVO.getProcedureService();
         if (sqlTemplateVO.isMerge()) {
             if (tableSqlInfoVO.getIsMergeModifyColumnStart()) {
-                FileUtils.writeFile(path, procedureService.comment());
+                FileUtils.writeFile(path, procedureService.getPComment(generalSqlInfoVO));
                 FileUtils.writeFile(path, procedureService.procedure());
             }
             FileUtils.writeFile(path, procedureService.comment());

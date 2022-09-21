@@ -21,13 +21,6 @@ public class OracleProcedureInsertData extends AbstractProcedureService {
                     "END ;\n" +
                     "/\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

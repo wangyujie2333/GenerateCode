@@ -12,13 +12,6 @@ public class MysqlProcedureAddTable extends AbstractProcedureService {
                     "\n";
     public static String addTableCall = "    %s %s %s COMMENT '%s'";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

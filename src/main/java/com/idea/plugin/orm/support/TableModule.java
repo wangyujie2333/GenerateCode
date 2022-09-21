@@ -1,24 +1,18 @@
 package com.idea.plugin.orm.support;
 
 import com.google.common.base.CaseFormat;
-import com.idea.plugin.document.support.ClazzInfoDOVO;
 import com.idea.plugin.orm.service.GeneratorFileStrService;
 import com.idea.plugin.orm.support.enums.FileTypePathEnum;
 import com.idea.plugin.sql.support.FieldInfoVO;
 import com.idea.plugin.sql.support.TableInfoVO;
 import com.idea.plugin.sql.support.enums.PrimaryTypeEnum;
-import com.idea.plugin.utils.StringUtil;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiElementFactory;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiType;
+import com.idea.plugin.translator.TranslatorFactroy;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class TableModule {
     public GeneratorContext context;
@@ -55,7 +49,7 @@ public abstract class TableModule {
     }
 
     public String getComment() {
-        return tableInfoVO.tableComment.replace("表", "");
+        return TranslatorFactroy.translate(fileTypeInfo.getFileName());
     }
 
     public String getSimpleName() {

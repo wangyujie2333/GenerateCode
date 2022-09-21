@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.colors.EditorColorsUtil;
 import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.TextTransferable;
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -14,6 +15,7 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -93,6 +95,7 @@ public class TextFormatView extends JRootPane {
     JComboBox<ToolMenu> javaBeanMenu;
     JComboBox<ToolMenu> sqlMenu;
     JComboBox<ToolMenu> textMenu;
+    JTextField searchText;
 
     private void doInitMenu() {
         ItemListener itemListener = e -> {
@@ -147,6 +150,10 @@ public class TextFormatView extends JRootPane {
         format.addActionListener(e -> doFormat());
         JButton copy = new JButton("copy");
         copy.addActionListener(e -> CopyPasteManager.getInstance().setContents(new TextTransferable(this.outputTextArea.getText())));
+        searchText = new JTextField();
+        searchText.setSize(200, 5);
+        JButton search = new JButton("search");
+        search.addActionListener(e -> search());
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panel.add(mainMenu);
         panel.add(jsonMenu);
@@ -155,6 +162,8 @@ public class TextFormatView extends JRootPane {
         panel.add(textMenu);
         panel.add(format);
         panel.add(copy);
+        panel.add(searchText);
+        panel.add(search);
         super.getContentPane().add(panel);
     }
 
@@ -237,6 +246,33 @@ public class TextFormatView extends JRootPane {
         } finally {
             this.getContentPane().repaint();
         }
+    }
+
+    /**
+     * 格式化动作
+     */
+    private void search() {
+        this.outputTextArea.removeAllLineHighlights();
+        if (StringUtils.isEmpty(this.searchText.getText().trim())) {
+            return;
+        }
+        int line = 0;
+        int endLine = 0;
+        for (String lineText : this.outputTextArea.getText().split("\n")) {
+            if (lineText.contains(searchText.getText().trim())) {
+                try {
+                    this.outputTextArea.addLineHighlight(line, JBColor.gray);
+                } catch (BadLocationException e) {
+                    NoticeUtil.error(e);
+                }
+                if (endLine == 0) {
+                    this.outputTextArea.setCaretPosition(endLine);
+                }
+                endLine = line;
+            }
+            line++;
+        }
+
     }
 
     /**

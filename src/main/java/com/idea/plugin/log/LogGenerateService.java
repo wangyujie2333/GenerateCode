@@ -1,5 +1,6 @@
 package com.idea.plugin.log;
 
+import com.idea.plugin.document.support.JavaTypeEnum;
 import com.idea.plugin.popup.module.ActionContext;
 import com.idea.plugin.setting.ToolSettings;
 import com.idea.plugin.setting.support.ReportConfigVO;
@@ -10,7 +11,6 @@ import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
-import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import org.apache.commons.lang3.StringUtils;
@@ -53,17 +53,21 @@ public class LogGenerateService {
                 if (psiElement.getNode() != null && psiElement instanceof PsiClass) {
                     PsiClass[] innerClasses = psiClass.getInnerClasses();
                     Optional<String> isInnerClazzOptional = Arrays.stream(innerClasses).map(NavigationItem::getName).filter(Objects::nonNull).filter(s -> s.equals(((PsiClass) psiElement).getName())).findAny();
-                    if (fileName.equals(((PsiClass) psiElement).getName()) || isInnerClazzOptional.isPresent()) {
+                    Caret caret = allCarets.get(0);
+                    int offset = caret.getOffset();
+                    int textsOffset = psiElement.getTextOffset();
+                    int texteOffset = psiElement.getTextOffset() + ((PsiClass) psiElement).getName().length();
+                    if ((offset <= texteOffset && offset >= textsOffset) || isInnerClazzOptional.isPresent()) {
                         writerClazzLog(context, (PsiClass) psiElement);
                     } else {
                         writeCommonLog(context, psiClass, allCarets.get(0));
                     }
                 } else if (psiElement.getNode() != null && psiElement instanceof PsiMethod) {
                     Caret caret = allCarets.get(0);
-                    int sOffset = caret.getSelectionStart();
-                    int eOffset = caret.getSelectionEnd();
-                    int textOffset = psiElement.getTextOffset();
-                    if (sOffset <= textOffset && eOffset >= textOffset) {
+                    int offset = caret.getOffset();
+                    int textsOffset = psiElement.getTextOffset();
+                    int texteOffset = psiElement.getTextOffset() + ((PsiMethod) psiElement).getName().length();
+                    if (offset <= texteOffset && offset >= textsOffset) {
                         writeMethodLog(context, (PsiMethod) psiElement, (PsiClass) psiElement.getParent());
                     } else {
                         writeCommonLog(context, psiClass, allCarets.get(0));
@@ -89,18 +93,27 @@ public class LogGenerateService {
     }
 
     private void writeCommonLog(ActionContext context, PsiClass psiClass, Caret caret) {
-        PsiElement psiElement = context.getPsiFile().findElementAt(caret.getOffset());
+        int offset = caret.getOffset();
+        PsiElement psiElement = context.getPsiFile().findElementAt(offset);
+        if (null == psiElement || psiElement.getText().equals(psiClass.getName()) || psiElement instanceof PsiWhiteSpace) {
+            psiElement = context.getPsiFile().findElementAt(offset - 1);
+        }
+        if (null == psiElement || psiElement.getText().equals(psiClass.getName()) || psiElement instanceof PsiWhiteSpace) {
+            psiElement = context.getPsiFile().findElementAt(offset + 1);
+        }
         if (psiElement == null) {
             return;
         }
+        PsiElement finalPsiElement = psiElement;
         WriteCommandAction.runWriteCommandAction(context.getProject(), () -> {
             final PsiElementFactory psiElementFactory = PsiElementFactory.getInstance(context.getProject());
-            PsiElement pPsiElement = psiElement;
+            PsiElement pPsiElement = finalPsiElement;
             while (!(pPsiElement instanceof PsiClass) && pPsiElement != null) {
                 PsiMethod psiMethod = null;
                 PsiExpressionStatement psiExpressionStatement = null;
                 PsiDeclarationStatement psiDeclarationStatement = null;
                 PsiTryStatement psiTryStatement = null;
+                PsiStatement psiStatement = null;
                 PsiElement mPsiElement = pPsiElement;
                 while (!(mPsiElement instanceof PsiClass) && mPsiElement != null) {
                     if (mPsiElement instanceof PsiMethod) {
@@ -116,47 +129,69 @@ public class LogGenerateService {
                     if (psiTryStatement == null && mPsiElement instanceof PsiTryStatement) {
                         psiTryStatement = (PsiTryStatement) mPsiElement;
                     }
+                    if (psiStatement == null && mPsiElement instanceof PsiStatement) {
+                        psiStatement = (PsiStatement) mPsiElement;
+                    }
                     mPsiElement = mPsiElement.getParent();
                 }
                 if (psiMethod == null || psiMethod.getBody() == null) {
                     break;
                 }
-                if (psiElement instanceof PsiIdentifier && psiDeclarationStatement == null) {
-                    if (psiExpressionStatement != null) {
-                        PsiType psiType = ((PsiReferenceExpressionImpl) psiElement.getParent()).getType();
-                        PsiElement logCommonCode = psiElementFactory.createStatementFromText(getLogCommon(psiMethod, psiType, pPsiElement.getText()), psiElement.getParent());
-                        psiExpressionStatement.getParent().addAfter(logCommonCode, psiExpressionStatement);
+                if (finalPsiElement instanceof PsiIdentifier) {
+                    PsiElement parent = finalPsiElement.getParent();
+                    if (parent instanceof PsiExpression) {
+                        PsiType psiType = ((PsiExpression) parent).getType();
+                        PsiElement logCommonCode = psiElementFactory.createStatementFromText(getLogCommon(psiMethod, psiType, pPsiElement.getText()), finalPsiElement.getParent());
+                        if (psiExpressionStatement != null) {
+                            psiExpressionStatement.getParent().addAfter(logCommonCode, psiExpressionStatement);
+                        } else if (psiDeclarationStatement != null) {
+                            psiDeclarationStatement.getParent().addAfter(logCommonCode, psiDeclarationStatement);
+                        } else if (psiStatement != null) {
+                            psiStatement.getParent().addAfter(logCommonCode, psiStatement);
+                        }
+                        break;
+                    } else if (parent instanceof PsiLocalVariable || parent instanceof PsiCatchSection) {
+                        pPsiElement = parent;
+                    }
+                }
+                if (pPsiElement instanceof PsiLocalVariable) {
+                    int offsetAdd = pPsiElement.getTextOffset() + 1;
+                    PsiElement elementAt = null;
+                    int lineNumberCurrent = context.getDocument().getLineNumber(offset);
+                    int lineNumberAdd = context.getDocument().getLineNumber(offsetAdd);
+                    while (lineNumberCurrent == lineNumberAdd) {
+                        lineNumberAdd = context.getDocument().getLineNumber(offsetAdd);
+                        PsiElement element = context.getPsiFile().findElementAt(++offsetAdd);
+                        if (element instanceof PsiIdentifier) {
+                            elementAt = element;
+                            break;
+                        }
+                    }
+                    if (elementAt != null) {
+                        PsiType psiType = ((PsiLocalVariable) pPsiElement).getType();
+                        PsiElement logCommonCode = psiElementFactory.createStatementFromText(getLogCommon(psiMethod, psiType, elementAt.getText()), finalPsiElement.getParent());
+                        if (psiExpressionStatement != null) {
+                            psiExpressionStatement.getParent().addAfter(logCommonCode, psiExpressionStatement);
+                        } else if (psiDeclarationStatement != null) {
+                            psiDeclarationStatement.getParent().addAfter(logCommonCode, psiDeclarationStatement);
+                        } else if (psiStatement != null) {
+                            psiStatement.getParent().addAfter(logCommonCode, psiStatement);
+                        }
                     }
                     break;
-                } else if (pPsiElement instanceof PsiLocalVariable || pPsiElement instanceof PsiCatchSection) {
-                    if (pPsiElement instanceof PsiLocalVariable) {
-                        int offsetAdd = pPsiElement.getTextOffset() + 1;
-                        PsiElement elementAt = null;
-                        int lineNumberCurrent = context.getDocument().getLineNumber(caret.getOffset());
-                        int lineNumberAdd = context.getDocument().getLineNumber(offsetAdd);
-                        while (lineNumberCurrent == lineNumberAdd) {
-                            lineNumberAdd = context.getDocument().getLineNumber(offsetAdd);
-                            PsiElement element = context.getPsiFile().findElementAt(++offsetAdd);
-                            if (element instanceof PsiIdentifier) {
-                                elementAt = element;
-                                break;
-                            }
+                }
+                if (pPsiElement instanceof PsiCatchSection) {
+                    String ex = "e";
+                    for (PsiElement child1 : pPsiElement.getChildren()) {
+                        if (child1 instanceof PsiParameter) {
+                            ex = child1.getLastChild().getText();
                         }
-                        if (elementAt != null && psiDeclarationStatement != null) {
-                            PsiType psiType = ((PsiLocalVariable) pPsiElement).getType();
-                            PsiElement logCommonCode = psiElementFactory.createStatementFromText(getLogCommon(psiMethod, psiType, elementAt.getText()), psiElement.getParent());
-                            psiDeclarationStatement.getParent().addAfter(logCommonCode, psiDeclarationStatement);
-                        }
-                    }
-                    if (pPsiElement instanceof PsiCatchSection) {
-                        String ex = "e";
-                        for (PsiElement child1 : pPsiElement.getChildren()) {
-                            if (child1 instanceof PsiParameter) {
-                                ex = child1.getLastChild().getText();
-                            }
-                            if (child1 instanceof PsiCodeBlock && psiTryStatement != null) {
-                                PsiElement logErrorCode = psiElementFactory.createStatementFromText(getLogError(psiMethod, ex), psiMethod.getContext());
+                        if (child1 instanceof PsiCodeBlock) {
+                            PsiElement logErrorCode = psiElementFactory.createStatementFromText(getLogError(psiMethod, ex), psiMethod.getContext());
+                            if (psiTryStatement != null) {
                                 psiTryStatement.addAfter(logErrorCode, child1.getFirstChild());
+                            } else if (psiStatement != null) {
+                                psiStatement.getParent().addAfter(logErrorCode, child1.getFirstChild());
                             }
                         }
                     }
@@ -253,21 +288,24 @@ public class LogGenerateService {
                         PsiParameterList parameterList = psiMethod.getParameterList();
                         PsiParameter[] parameters = parameterList.getParameters();
                         if (parameters.length > 0) {
-                            StringBuilder param = new StringBuilder();
+                            List<String> param = new ArrayList<>();
                             for (PsiParameter parameter : parameters) {
                                 if (parameter != null) {
                                     String name = parameter.getName();
                                     PsiType type = parameter.getType();
-                                    if (StringUtils.isEmpty(logTemplate.getSerial()) || type instanceof PsiPrimitiveType) {
-                                        param.append("\"").append(name).append(":\" + ").append(name);
-                                    } else if (type instanceof PsiArrayType || type instanceof PsiClassType) {
-                                        param.append("\"").append(name).append(":\" + ").append(String.format(logTemplate.getSerial(), name));
+                                    if (StringUtils.isEmpty(logTemplate.getSerial())) {
+                                        param.add("\"" + name + ":\" + " + name);
                                     } else {
-                                        param.append("\"").append(name).append(":\" + ").append(name);
+                                        JavaTypeEnum javaTypeEnum = JavaTypeEnum.codeToEnum(type.getCanonicalText());
+                                        if (javaTypeEnum == null || JavaTypeEnum.MAP_TYPE.equals(javaTypeEnum) || JavaTypeEnum.LIST_TYPE.equals(javaTypeEnum)) {
+                                            param.add("\"" + name + ":\" + " + String.format(logTemplate.getSerial(), name));
+                                        } else {
+                                            param.add("\"" + name + ":\" + " + name);
+                                        }
                                     }
                                 }
                             }
-                            argsList.add(param.toString());
+                            argsList.add(String.join(" + ", param));
                         }
                     } else if (msg.contains("return")) {
                         PsiType returnType = psiMethod.getReturnType();
@@ -316,9 +354,17 @@ public class LogGenerateService {
     }
 
     private String getLogCommon(PsiMethod psiMethod, PsiType psiType, String text) {
+        String variable = text;
+
         ReportConfigVO reportConfig = ToolSettings.getReportConfig();
         if (reportConfig != null && reportConfig.getLogTemplate() != null) {
             LogTemplateVO logTemplate = reportConfig.getLogTemplate();
+            if (!StringUtils.isEmpty(logTemplate.getSerial())) {
+                JavaTypeEnum javaTypeEnum = JavaTypeEnum.codeToEnum(psiType.getCanonicalText());
+                if (javaTypeEnum == null || JavaTypeEnum.MAP_TYPE.equals(javaTypeEnum) || JavaTypeEnum.LIST_TYPE.equals(javaTypeEnum)) {
+                    text = String.format(logTemplate.getSerial(), text);
+                }
+            }
             String logCommonStr = logTemplate.getLogCommon();
             int counts = 0;
             while (logCommonStr.length() > 0) {
@@ -335,11 +381,11 @@ public class LogGenerateService {
             } else if (counts == 1) {
                 argsList.add("\"" + psiMethod.getName() + "\"");
             } else if (counts == 2) {
-                argsList.add("\"" + text + "\"");
+                argsList.add("\"" + variable + "\"");
                 argsList.add(text);
             } else {
                 argsList.add("\"" + psiMethod.getName() + "\"");
-                argsList.add("\"" + text + "\"");
+                argsList.add("\"" + variable + "\"");
                 argsList.add(text);
             }
             while (argsList.size() < counts) {
@@ -347,7 +393,7 @@ public class LogGenerateService {
             }
             return String.format(logTemplate.getLogCommon(), argsList.toArray());
         }
-        return String.format(logCommon, psiMethod.getName(), text, text);
+        return String.format(logCommon, psiMethod.getName(), variable, text);
     }
 
     public enum LogTypeEnum {

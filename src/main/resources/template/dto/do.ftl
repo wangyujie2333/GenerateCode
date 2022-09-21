@@ -6,7 +6,7 @@ import ${import};
 </#list>
 
 /**
-* ${comment}持久对象类
+* ${comment}
 *
 * @author ${author}
 * @date ${date}

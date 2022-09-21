@@ -2,7 +2,10 @@ package com.idea.plugin.document.support;
 
 import com.intellij.psi.PsiMethod;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MethodInfoVO {
 

@@ -5,7 +5,7 @@ import ${import};
 </#list>
 
 /**
-* ${comment}值对象类
+* ${comment}
 *
 * @author ${author}
 * @date ${date}

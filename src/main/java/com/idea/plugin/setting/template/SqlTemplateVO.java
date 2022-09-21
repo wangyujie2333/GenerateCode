@@ -20,6 +20,7 @@ public class SqlTemplateVO {
     public static class SqlTemplate {
         private String procedureType;
         private Boolean isMerge;
+        private Boolean isParam;
         private String comment;
         private SqlStr mysql;
         private SqlStr oracle;
@@ -41,6 +42,14 @@ public class SqlTemplateVO {
 
         public void setIsMerge(Boolean isMerge) {
             this.isMerge = isMerge;
+        }
+
+        public Boolean getIsParam() {
+            return isParam;
+        }
+
+        public void setIsParam(Boolean isParam) {
+            this.isParam = isParam;
         }
 
         public String getComment() {

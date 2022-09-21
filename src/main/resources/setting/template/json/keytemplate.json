@@ -1,0 +1,9 @@
+{
+  "done": "## DONE",
+  "todo": "## TODO",
+  "need": "1、需求：",
+  "bug": "2、bug：",
+  "other": "3、其他：",
+  "learn": "## LEARN",
+  "summary": "## SUMMARY"
+}

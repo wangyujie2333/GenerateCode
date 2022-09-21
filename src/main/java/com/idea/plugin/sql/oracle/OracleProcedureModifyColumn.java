@@ -18,13 +18,6 @@ public class OracleProcedureModifyColumn extends AbstractProcedureService {
     public static String modifyColumnCall = "CALL MODIFY_${shortName}_COLUMN('${shortName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n";
     public static String modifyColumnDrop = "\nDROP PROCEDURE MODIFY_${shortName}_COLUMN;\n\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

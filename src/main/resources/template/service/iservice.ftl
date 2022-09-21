@@ -5,7 +5,7 @@ import ${import};
 </#list>
 
 /**
-* ${comment}服务接口类
+* ${comment}
 *
 * @author ${author}
 * @date ${date}

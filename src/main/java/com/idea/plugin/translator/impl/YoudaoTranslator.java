@@ -3,7 +3,6 @@ package com.idea.plugin.translator.impl;
 import com.idea.plugin.utils.HttpUtil;
 import com.idea.plugin.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.intellij.images.editor.actions.BackgroundImageDialog;
 
 import java.util.List;
 import java.util.Objects;

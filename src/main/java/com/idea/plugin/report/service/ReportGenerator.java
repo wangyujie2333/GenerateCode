@@ -1,7 +1,6 @@
 package com.idea.plugin.report.service;
 
 import com.idea.plugin.api.WanNianLiService;
-import com.idea.plugin.api.WanNianLiVO;
 import com.idea.plugin.orm.service.GeneratorConfig;
 import com.idea.plugin.report.support.ReportContext;
 import com.idea.plugin.report.support.ReportModuleFactory;

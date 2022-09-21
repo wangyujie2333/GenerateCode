@@ -111,7 +111,6 @@ public class DBUtils {
                         || LocalDate.class.getName().equals(columnClassName)
                         || LocalDateTime.class.getName().equals(columnClassName)
                         || Date.class.getName().equals(columnClassName)) {
-
                     Timestamp timestamp = resultSet.getTimestamp(i);
                     if (timestamp != null) {
                         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -413,8 +412,9 @@ public class DBUtils {
                 String values = String.join(", ", rowValues);
                 tableInfoVO.addInsertData("INSERT INTO " + tableInfoVO.tableName + " (" + codes + ") VALUES (" + values + ");");
             }
-            String codeAlias = codeList.stream().map(code -> code + " AS " + code).collect(Collectors.joining("\n"));
-            tableInfoVO.setInsertSql("SELECT " + codeAlias + " FROM " + tableInfoVO.tableName + " WHERE " + idCode + " = " + idValue + ";");
+            int maxCode = codeList.stream().max(Comparator.comparing(String::length)).get().trim().length();
+            String codeAlias = codeList.stream().map(code -> code + StringUtil.getBlank(code, maxCode) + " AS " + code).collect(Collectors.joining(",\n                 "));
+            tableInfoVO.setInsertSql("SELECT " + codeAlias + "\n          FROM " + tableInfoVO.tableName + "\n          WHERE " + idCode + " = " + idValue + ";");
             tableInfoVO.setInsertColumnName(codes);
             tableInfoVO.setInsertColumnParam(idCode);
         } catch (Exception e) {

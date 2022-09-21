@@ -19,13 +19,6 @@ public class MysqlProcedureAddColumn extends AbstractProcedureService {
     public static String addColumnCall = "CALL ADD_${shortName}_COLUMN('${tableName}', '${columnName}', '${columnType} ${nullType}', '${fcomment}');\n";
     public static String addColumnDrop = "\nDROP PROCEDURE ADD_${shortName}_COLUMN;\n\n";
 
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
-
     @Override
     public String getProcedure() {
         if (super.getProcedure() != null) {

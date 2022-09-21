@@ -1,11 +1,7 @@
 package com.idea.plugin.text.json;
 
-import com.idea.plugin.text.mybatis.LogParser;
-import com.idea.plugin.text.mybatis.SqlFormatter;
-import com.idea.plugin.utils.JsonUtil;
 import com.idea.plugin.utils.NoticeUtil;
 import com.intellij.ui.JBColor;
-import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
@@ -54,7 +50,7 @@ public enum ConvertType {
             int lineIndex = (Integer.parseInt(matcher.group(1))) - 1;
             // 设置错误行背景色
             try {
-                input.addLineHighlight(lineIndex, JBColor.RED);
+                input.addLineHighlight(lineIndex, JBColor.red);
             } catch (BadLocationException e) {
                 NoticeUtil.error(e);
             }

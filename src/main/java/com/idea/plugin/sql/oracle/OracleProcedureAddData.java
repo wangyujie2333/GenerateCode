@@ -5,32 +5,26 @@ import com.idea.plugin.sql.AbstractProcedureService;
 public class OracleProcedureAddData extends AbstractProcedureService {
 
     public static String insertDataProcedure =
-            "CREATE OR REPLACE PROCEDURE INSERT_%s_DATA(%s) AS\n" +
-                    "    V_TABLE_DATA %s;\n" +
-                    "    V_TABLE_ID      VARCHAR2(32);\n" +
-                    "CURSOR CUR_TABLE_DATA_LOOP IS SELECT * FROM %s\n" +
-                    "                                           WHERE %s\n" +
-                    "                                             AND NOT EXISTS(SELECT 1 FROM %s T WHERE T.%s);\n" +
+            "CREATE OR REPLACE PROCEDURE INSERT_${shortName}_DATA${columnParams}\n" +
+                    "${columnNameDeclare}\n" +
+                    "CURSOR CUR_TABLE_DATA_LOOP IS SELECT * \n" +
+                    "                              FROM ${tableName}" +
+                    "${columnCondition}\n" +
                     "BEGIN\n" +
-                    "FOR V_TABLE_DATA IN CUR_TABLE_DATA_LOOP\n" +
+                    "OPEN CUR_TABLE_DATA_LOOP;\n" +
                     "    LOOP\n" +
+                    "        FETCH CUR_TABLE_DATA_LOOP INTO ${columnNameV};\n" +
+                    "        EXIT WHEN CUR_TABLE_DATA_LOOP${notfound};\n" +
                     "        SELECT lower(rawtohex(sys_guid())) INTO V_TABLE_ID FROM DUAL;\n" +
-                    "        INSERT INTO %s (%s)\n" +
-                    "        VALUES (V_TABLE_ID,%s);\n" +
+                    "        INSERT INTO ${tableName} (${insertColumnName})\n" +
+                    "        VALUES (V_TABLE_ID, ${columnNameValue});\n" +
                     "    END LOOP;\n" +
                     "COMMIT;\n" +
                     "\n" +
-                    "END INSERT_%s_DATA;\n" +
+                    "END INSERT_${shortName}_DATA;\n" +
                     "/\n\n";
-    public static String insertDataCall = "CALL INSERT_%s_DATA();\n\n";
-    public static String insertDataDrop = "DROP PROCEDURE INSERT_%s_DATA;\n\n";
-
-    public String getComment() {
-        if (super.getComment() != null) {
-            return super.getComment();
-        }
-        return comment;
-    }
+    public static String insertDataCall = "CALL INSERT_${shortName}_DATA(${param});\n\n";
+    public static String insertDataDrop = "DROP PROCEDURE INSERT_${shortName}_DATA;\n\n";
 
     @Override
     public String getProcedure() {

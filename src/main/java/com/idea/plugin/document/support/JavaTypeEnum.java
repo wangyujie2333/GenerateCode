@@ -1,7 +1,5 @@
 package com.idea.plugin.document.support;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.Timestamp;
@@ -14,7 +12,7 @@ import java.util.Map;
 
 public enum JavaTypeEnum {
 
-    VOID_TYPE(Object.class, "void"),
+    VOID_TYPE(Void.class, "void"),
     BYTE_TYPE(Byte.class, JDBCType.INTEGER, "byte"),
     SHORT_TYPE(Short.class, JDBCType.INTEGER, "short"),
     INT_TYPE(Integer.class, JDBCType.INTEGER, "int"),
@@ -85,9 +83,7 @@ public enum JavaTypeEnum {
             return Arrays.stream(JavaTypeEnum.values()).filter(javaTypeEnum ->
                     simpClazzName.equals(javaTypeEnum.getBasicName())).findAny().get();
         } else {
-            return Arrays.stream(JavaTypeEnum.values()).filter(javaTypeEnum ->
-                    StringUtils.isEmpty(javaTypeEnum.getBasicName())
-                            && javaTypeEnum.getCalzz().getSimpleName().equalsIgnoreCase(simpClazzName)).findAny().orElse(null);
+            return Arrays.stream(JavaTypeEnum.values()).filter(javaTypeEnum -> javaTypeEnum.getCalzz() != null && javaTypeEnum.getCalzz().getSimpleName().equalsIgnoreCase(simpClazzName)).findAny().orElse(null);
         }
     }
 

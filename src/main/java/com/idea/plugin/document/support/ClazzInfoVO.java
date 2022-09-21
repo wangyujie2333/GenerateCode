@@ -129,7 +129,7 @@ public class ClazzInfoVO {
     }
 
     public void addClazzImports(String clazzName) {
-        if (StringUtils.isEmpty(clazzName.trim())) {
+        if (StringUtils.isEmpty(clazzName)) {
             return;
         }
         JavaTypeEnum javaTypeEnum = JavaTypeEnum.codeToEnum(clazzName);

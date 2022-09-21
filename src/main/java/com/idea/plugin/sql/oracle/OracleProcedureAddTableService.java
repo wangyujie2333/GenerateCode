@@ -6,6 +6,7 @@ import com.idea.plugin.sql.support.SqlTemplateModeule;
 import com.idea.plugin.sql.support.TableSqlInfoVO;
 import com.idea.plugin.sql.support.enums.PrimaryTypeEnum;
 import com.idea.plugin.utils.FileUtils;
+import com.idea.plugin.utils.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +24,7 @@ public class OracleProcedureAddTableService extends BaseProcedureService {
         String procedure = procedureService.getProcedure();
         Integer length = tableSqlInfoVO.getFieldInfos().stream().map(fieldInfo -> fieldInfo.columnName.length()).max(Comparator.comparing(Integer::intValue)).get();
         String call = tableSqlInfoVO.getFieldInfos().stream().map(fieldVO -> {
-            String format = String.format(procedureService.getCall(), getColumnName(fieldVO.columnName, length), fieldVO.columnType.getOtype(fieldVO.columnTypeArgs), fieldVO.nullType.getCode());
+            String format = String.format(procedureService.getCall(), StringUtil.getBlank(fieldVO.columnName, length), fieldVO.columnType.getOtype(fieldVO.columnTypeArgs), fieldVO.nullType.getCode());
             if (PrimaryTypeEnum.PRIMARY.equals(fieldVO.primary)) {
                 format = format + String.format("\n                    CONSTRAINT %s_PK PRIMARY KEY", tableSqlInfoVO.tableName);
             }
@@ -34,10 +35,4 @@ public class OracleProcedureAddTableService extends BaseProcedureService {
         FileUtils.writeFile(path, procedure);
     }
 
-    private String getColumnName(String columnName, Integer length) {
-        for (int i = columnName.length(); i < length; i++) {
-            columnName += " ";
-        }
-        return columnName;
-    }
 }

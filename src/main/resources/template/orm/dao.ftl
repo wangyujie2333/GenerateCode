@@ -5,7 +5,7 @@ import ${import};
 </#list>
 
 /**
-* ${comment}数据访问对象接口
+* ${comment}
 *
 * @author ${author}
 * @date ${date}

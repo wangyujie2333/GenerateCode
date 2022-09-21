@@ -28,6 +28,7 @@ public class NoticeUtil {
     public static Notification getInfo(String text) {
         return group.createNotification(NoticeUtil.NAME, NoticeUtil.NAME, text, NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER);
     }
+
     public static Notification getWarn(String text) {
         return group.createNotification(NoticeUtil.NAME, NoticeUtil.NAME, text, NotificationType.WARNING);
     }

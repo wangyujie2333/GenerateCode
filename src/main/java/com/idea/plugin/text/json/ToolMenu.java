@@ -115,28 +115,31 @@ public enum ToolMenu {
     SQL_LOG("MybatisLog", ConvertType.SQL) {
         @Override
         public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
-            String sql = LogParser.toBeautifulSql(input.getText());
-            if (StringUtils.isEmpty(sql)) {
-                // 设置错误行背景色
-                // 默认设置第一行
-                try {
-                    input.addLineHighlight(0, JBColor.RED);
-                } catch (BadLocationException ex) {
-                    NoticeUtil.error(ex);
-                }
-                // 设置提示信息
-                input.setToolTipSupplier((RTextArea rt, MouseEvent me) -> {
-                    int offset = 0;
+            try {
+                String sql = LogParser.toBeautifulSql(input.getText());
+                if (StringUtils.isEmpty(sql)) {
+                    // 设置错误行背景色
+                    // 默认设置第一行
                     try {
-                        offset = input.getLineOfOffset(input.viewToModel(me.getPoint()));
+                        input.addLineHighlight(0, JBColor.red);
                     } catch (BadLocationException ex) {
                         NoticeUtil.error(ex);
                     }
-                    return offset == 0 ? "the log you input which without \"Preparing:\" or \"Parameters:\"" : null;
-                });
-            } else {
-                output.setText(SqlFormatter.format(sql));
-                output.setCaretPosition(0);
+                    // 设置提示信息
+                    input.setToolTipSupplier((RTextArea rt, MouseEvent me) -> {
+                        int offset = 0;
+                        try {
+                            offset = input.getLineOfOffset(input.viewToModel(me.getPoint()));
+                        } catch (BadLocationException ex) {
+                        }
+                        return offset == 0 ? "the log you input which without \"Preparing:\" or \"Parameters:\"" : null;
+                    });
+                } else {
+                    output.setText(SqlFormatter.format(sql));
+                    output.setCaretPosition(0);
+                }
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
             }
         }
     },
@@ -279,7 +282,7 @@ public enum ToolMenu {
             int lineIndex = (Integer.parseInt(matcher.group(1))) - 1;
             // 设置错误行背景色
             try {
-                input.addLineHighlight(lineIndex, JBColor.RED);
+                input.addLineHighlight(lineIndex, JBColor.red);
             } catch (BadLocationException e) {
                 NoticeUtil.error(e);
             }

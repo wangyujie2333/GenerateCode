@@ -71,11 +71,21 @@ public class StringUtil {
      * @return
      */
     public static String textToCamelCase(String str, Boolean isUpper) {
-        str = textToWords(str).replaceAll("(\\s+)([a-zA-Z])", "\\U$2");
-        if (str.length() > 1 && !Boolean.TRUE.equals(isUpper)) {
-            str = str.substring(0, 1).toLowerCase() + str.substring(1);
+        str = textToWords(str);
+        StringBuilder stringBuilder = new StringBuilder();
+        char[] chars = str.toCharArray();
+        for (int i = 0, len = chars.length; i < len; i++) {
+            if (i == 0 && Boolean.TRUE.equals(isUpper)) {
+                stringBuilder.append(Character.toUpperCase(chars[i]));
+                continue;
+            }
+            if (chars[i] == ' ' && chars[i + 1] >= 'A' && chars[i + 1] <= 'z') {
+                stringBuilder.append(Character.toUpperCase(chars[++i]));
+            } else {
+                stringBuilder.append(chars[i]);
+            }
         }
-        return str;
+        return stringBuilder.toString();
     }
 
     /**
@@ -90,7 +100,7 @@ public class StringUtil {
 
     public static String textToWords(String str, boolean digitBlank) {
         //selectText  select Text select_text select_Text SELECT_TEXT
-        str = str.replaceAll("([-|_|\\s|\n|\r]+)([a-zA-Z])", " \\U$2");
+        str = str.replaceAll("([-|_|\\s|\n|\r|\\.]+)([a-zA-Z])", " $2");
         if (isAllUpperCase(str, ' ')) {
             return str.toLowerCase();
         }
@@ -106,6 +116,8 @@ public class StringUtil {
             } else if (Character.isLowerCase(previousChar) && Character.isUpperCase(c)) {
                 stringBuilder.append(" ").append(c);
             } else if (digitBlank && !previousDigit && digit) {
+                stringBuilder.append(" ").append(c);
+            } else if (digitBlank && previousChar == '.') {
                 stringBuilder.append(" ").append(c);
             } else {
                 stringBuilder.append(c);
@@ -266,9 +278,11 @@ public class StringUtil {
                 ++i;
             }
         }
-
+        templateStr = templateStr.replaceAll("%", "===!===");
         templateStr = templateStr.replaceAll("\\$\\{[\\w -.]+}", "%s");
-        return String.format(templateStr, args);
+        String format = String.format(templateStr, args);
+        format = format.replaceAll("===!===", "%");
+        return format;
     }
 
     public static String now() {
@@ -298,5 +312,13 @@ public class StringUtil {
         Calendar calendar = DateUtils.DateToCalendar(now);
         int number = calendar.get(Calendar.MONTH);
         return now.getYear() + "-" + (number % 3 == 0 ? number / 3 : number / 3 + 1);
+    }
+
+    public static String getBlank(String code, Integer max) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = code.length(); i < max; i++) {
+            sb.append(" ");
+        }
+        return sb.toString();
     }
 }
