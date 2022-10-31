@@ -1,5 +1,6 @@
 package com.idea.plugin.utils;
 
+import com.idea.plugin.document.support.ClazzInfoDOVO;
 import com.idea.plugin.document.support.ClazzInfoVO;
 import com.idea.plugin.document.support.JavaDocConfig;
 import com.idea.plugin.document.support.MethodInfoVO;
@@ -7,11 +8,14 @@ import com.idea.plugin.orm.service.GeneratorFileStrService;
 import com.idea.plugin.orm.service.GeneratorXmlFileStrService;
 import com.idea.plugin.orm.service.ProjectGenerator;
 import com.idea.plugin.orm.support.GeneratorContext;
+import com.idea.plugin.orm.support.enums.ClazzTypeEnum;
 import com.idea.plugin.orm.support.enums.FileTypePathEnum;
 import com.idea.plugin.orm.support.enums.MethodEnum;
 import com.idea.plugin.popup.module.ActionContext;
 import com.idea.plugin.setting.ToolSettings;
+import com.idea.plugin.setting.support.ReportConfigVO;
 import com.idea.plugin.setting.support.TableConfigVO;
+import com.idea.plugin.setting.template.JavaTemplateVO;
 import com.idea.plugin.sql.AbstractProcedureService;
 import com.idea.plugin.sql.support.*;
 import com.idea.plugin.sql.support.enums.*;
@@ -130,24 +134,23 @@ public class CreateFileUtils {
         AssertUtils.assertIsTrue(StringUtils.isNotEmpty(generalOrmInfoVO.modulePath), "文件路径modulePath不能为空");
         AssertUtils.assertIsTrue(CollectionUtils.isNotEmpty(generalOrmInfoVO.getTableInfos()), "生成文件类型procedureType不能为空");
 
-        ProjectGenerator projectGenerator = new ProjectGenerator();
         Class<GeneralOrmInfoVO> generalOrmInfoVOClass = GeneralOrmInfoVO.class;
         Class<TableOrmInfoVO> tableOrmInfoVOClass = TableOrmInfoVO.class;
         for (TableOrmInfoVO tableInfoVO : generalOrmInfoVO.getTableInfos()) {
             TableConfigVO config = ToolSettings.getTableConfig();
             if (StringUtils.isNotEmpty(tableInfoVO.getInterfaceClazz())) {
-                generalFromFile(generalOrmInfoVO, context, projectGenerator, tableInfoVO);
+                generalFromFile(generalOrmInfoVO, context, tableInfoVO);
                 if (tableInfoVO.getProcedureTypeList().contains(ProcedureTypeEnum.DO)) {
                     tableInfoVO.setProcedureType(ProcedureTypeEnum.DO.name());
-                    generalFromDB(generalOrmInfoVO, projectGenerator, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO, config);
+                    generalFromDB(generalOrmInfoVO, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO, config);
                 }
             } else {
-                generalFromDB(generalOrmInfoVO, projectGenerator, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO, config);
+                generalFromDB(generalOrmInfoVO, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO, config);
             }
         }
     }
 
-    public static void generalFromFile(GeneralOrmInfoVO generalOrmInfoVO, ActionContext context, ProjectGenerator projectGenerator, TableOrmInfoVO tableInfoVO) {
+    public static void generalFromFile(GeneralOrmInfoVO generalOrmInfoVO, ActionContext context, TableOrmInfoVO tableInfoVO) {
         for (String interfaceClazz : tableInfoVO.getInterfaceClazz().split(";")) {
             String[] interfaceClazzArr = interfaceClazz.split("#");
             List<String> methodNames = new ArrayList<>();
@@ -180,7 +183,7 @@ public class CreateFileUtils {
                     }
                     GeneratorContext generatorContext = new GeneratorContext(generalOrmInfoVO, fileTypePathEnum, clazzInfoVO);
                     generatorContext.setProject(context.getProject());
-                    projectGenerator.getFileTypeInfo(generatorContext);
+                    ProjectGenerator.getFileTypeInfo(generatorContext);
                     if (CollectionUtils.isNotEmpty(methodNames)) {
                         List<String> finalMethodNames = methodNames;
                         clazzInfoVO.setMethodInfos(clazzInfoVO.getMethodInfos().stream().filter(methodInfoVO -> finalMethodNames.contains(methodInfoVO.getMethodName())).collect(Collectors.toList()));
@@ -235,7 +238,7 @@ public class CreateFileUtils {
                                 }).collect(Collectors.toList());
                                 targetClazzInfoVO.setMethodInfos(methodInfoVOS);
                                 GeneratorContext targetGeneratorContext = new GeneratorContext(generalOrmInfoVO, fileTypePathEnum, targetClazzInfoVO);
-                                projectGenerator.getFileTypeInfo(generatorContext);
+                                ProjectGenerator.getFileTypeInfo(targetGeneratorContext);
                                 String classMethodStr = GeneratorFileStrService.getClassMethodStr(targetGeneratorContext);
                                 if (StringUtils.isEmpty(classMethodStr)) {
                                     continue;
@@ -265,17 +268,17 @@ public class CreateFileUtils {
         }
     }
 
-    public static void generalFromDB(GeneralOrmInfoVO generalOrmInfoVO, ProjectGenerator projectGenerator, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, TableOrmInfoVO tableInfoVO, TableConfigVO config) {
+    public static void generalFromDB(GeneralOrmInfoVO generalOrmInfoVO, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, TableOrmInfoVO tableInfoVO, TableConfigVO config) {
         TableInfoVO tableInfoVOFromDB = DBUtils.getTableInfoVOFromDB(generalOrmInfoVO, tableInfoVO, config);
         tableInfoVO.tableComment = tableInfoVOFromDB.tableComment;
         tableInfoVO.fieldInfos = tableInfoVOFromDB.getFieldInfos();
-        generalJavaFromDb(generalOrmInfoVO, projectGenerator, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO);
+        generalJavaFromDb(generalOrmInfoVO, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO);
     }
 
-    public static void generalFromDbTable(GeneralOrmInfoVO generalOrmInfoVO, ProjectGenerator projectGenerator, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, DbTable dbTable) {
+    public static void generalFromDbTable(GeneralOrmInfoVO generalOrmInfoVO, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, DbTable dbTable) {
         TableInfoVO tableInfoVO = getTableInfoVO(dbTable);
         tableInfoVO.setProcedureType(generalOrmInfoVO.getTableInfos().get(0).getProcedureType());
-        generalJavaFromDb(generalOrmInfoVO, projectGenerator, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO);
+        generalJavaFromDb(generalOrmInfoVO, generalOrmInfoVOClass, tableOrmInfoVOClass, tableInfoVO);
     }
 
     public static TableInfoVO getTableInfoVO(DbTable dbTable) {
@@ -313,18 +316,28 @@ public class CreateFileUtils {
         return tableInfoVO;
     }
 
-    private static void generalJavaFromDb(GeneralOrmInfoVO generalOrmInfoVO, ProjectGenerator projectGenerator, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, TableInfoVO tableInfoVO) {
+    private static void generalJavaFromDb(GeneralOrmInfoVO generalOrmInfoVO, Class<GeneralOrmInfoVO> generalOrmInfoVOClass, Class<TableOrmInfoVO> tableOrmInfoVOClass, TableInfoVO tableInfoVO) {
         if (CollectionUtils.isEmpty(generalOrmInfoVO.getMethods())) {
             generalOrmInfoVO.setMethods(MethodEnum.getDefaultMthods());
         }
+        ReportConfigVO reportConfig = ToolSettings.getReportConfig();
         AtomicBoolean batch = new AtomicBoolean(false);
         ClazzInfoVO clazzInfoVO = new ClazzInfoVO();
+        clazzInfoVO.setFieldinfos(tableInfoVO.getFieldInfos().stream().map(com.idea.plugin.document.support.FieldInfoVO::new).collect(Collectors.toList()));
+        ClazzInfoDOVO clazzInfoDOVO = new ClazzInfoDOVO();
+        clazzInfoDOVO.setTableName(tableInfoVO.tableName);
+        clazzInfoDOVO.setClazzName(FileTypePathEnum.DO.getFileName(tableInfoVO.tableName, reportConfig.javaTemplateVO));
+        clazzInfoDOVO.setFieldinfos(tableInfoVO.getFieldInfos().stream().map(com.idea.plugin.document.support.FieldInfoVO::new).collect(Collectors.toList()));
         List<MethodInfoVO> methodInfos = generalOrmInfoVO.getMethods().stream().map(methodName -> {
-            if (methodName.contains("Batch")) {
+            if (methodName.endsWith("Batch")) {
                 batch.set(true);
             }
-            String ret = MethodEnum.codeToEnum(methodName).getRet(tableInfoVO.tableName);
-            String param = MethodEnum.codeToEnum(methodName).getParam(tableInfoVO.tableName);
+            MethodEnum methodEnum = MethodEnum.codeToEnum(methodName);
+            String ret = methodEnum.getRet(tableInfoVO.tableName, reportConfig.getJavaTemplateVO());
+            if (methodName.contains("insert") || methodName.contains("update") || methodName.contains("Batch")) {
+                ret = "int";
+            }
+            String param = methodEnum.getParam(tableInfoVO.tableName, reportConfig.getJavaTemplateVO(), generalOrmInfoVO);
             MethodInfoVO methodInfoVO = new MethodInfoVO();
             methodInfoVO.setMethodName(methodName);
             methodInfoVO.setMethodReturn(ret);
@@ -361,15 +374,27 @@ public class CreateFileUtils {
             for (FileTypePathEnum fileTypePathEnum : procedureTypeEnum.getFileCreateType().getFileTypePathList()) {
                 GeneratorContext generatorContext = new GeneratorContext(generalOrmInfoVO, fileTypePathEnum, tableInfoVO);
                 generatorContext.setClazzInfoVO(copyClazzInfoVO);
-                projectGenerator.generationFile(generatorContext);
+                copyClazzInfoVO.setClazzType(ClazzTypeEnum.CLASS_CLAZZ);
+                if (fileTypePathEnum.equals(FileTypePathEnum.DAO) || fileTypePathEnum.equals(FileTypePathEnum.ISERVICE)) {
+                    copyClazzInfoVO.setClazzType(ClazzTypeEnum.INTERFACE_CLAZZ);
+                }
+                copyClazzInfoVO.setClazzInfoDOVO(clazzInfoDOVO);
+                if (reportConfig.getJavaTemplateVO() != null) {
+                    generatorContext.setJavaTemplateVO(reportConfig.getJavaTemplateVO());
+                    GeneratorFileStrService.generationClassClassFile(generatorContext);
+                } else {
+                    ProjectGenerator.generationFile(generatorContext);
+                }
             }
-            if (ProcedureTypeEnum.DAO.equals(procedureTypeEnum) && batch.get()) {
-                GeneratorContext generatorContext = new GeneratorContext(generalOrmInfoVO, FileTypePathEnum.MAPPER_MYSQL, tableInfoVO);
-                generatorContext.setClazzInfoVO(copyClazzInfoVO);
-                projectGenerator.generationFile(generatorContext);
-                GeneratorContext generatorContext2 = new GeneratorContext(generalOrmInfoVO, FileTypePathEnum.MAPPER_ORACLE, tableInfoVO);
-                generatorContext2.setClazzInfoVO(copyClazzInfoVO);
-                projectGenerator.generationFile(generatorContext2);
+            if ((!JavaTemplateVO.isJpa(reportConfig.getJavaTemplateVO()))
+                    && ProcedureTypeEnum.DAO.equals(procedureTypeEnum)
+                    && batch.get()) {
+                GeneratorContext generatorContextM = new GeneratorContext(generalOrmInfoVO, FileTypePathEnum.MAPPER_MYSQL, tableInfoVO);
+                generatorContextM.setClazzInfoVO(copyClazzInfoVO);
+                ProjectGenerator.generationFile(generatorContextM);
+                GeneratorContext generatorContextO = new GeneratorContext(generalOrmInfoVO, FileTypePathEnum.MAPPER_ORACLE, tableInfoVO);
+                generatorContextO.setClazzInfoVO(copyClazzInfoVO);
+                ProjectGenerator.generationFile(generatorContextO);
             }
         }
     }

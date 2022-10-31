@@ -11,9 +11,9 @@ public class OracleProcedureAddTable extends AbstractProcedureService {
                     "    SELECT count(1) INTO V_T_COUNT FROM USER_TABLES WHERE TABLE_NAME = '%s';\n" +
                     "    IF V_T_COUNT = 0 THEN\n" +
                     "        EXECUTE IMMEDIATE  'CREATE TABLE %s\n" +
-                    "            (\n" +
+                    "                           (\n" +
                     "%s" +
-                    "            \n)';\n" +
+                    "\n                           )';\n" +
                     "        EXECUTE IMMEDIATE  'COMMENT ON TABLE %s IS ''%s''';\n" +
                     "%s\n" +
                     "    END IF;\n" +

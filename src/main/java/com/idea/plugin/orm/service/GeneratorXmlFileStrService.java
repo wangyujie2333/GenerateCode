@@ -10,6 +10,7 @@ import com.intellij.psi.PsiEnumConstant;
 import com.intellij.psi.PsiModifier;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.JDBCType;
@@ -131,7 +132,11 @@ public class GeneratorXmlFileStrService {
             "        )\n";
 
     public static ClazzInfoDOVO getDOInfo(GeneratorContext context) {
-        return context.getClazzInfoVO().getClazzInfoDOVO();
+        ClazzInfoDOVO clazzInfoDOVO = context.getClazzInfoVO().getClazzInfoDOVO();
+        if (!clazzInfoDOVO.getClazzName().contains(".") && StringUtils.isNotEmpty(context.getClazzInfoVO().getPackageName())) {
+            clazzInfoDOVO.setClazzName(context.getClazzInfoVO().getPackageName() + "." + clazzInfoDOVO.getClazzName());
+        }
+        return clazzInfoDOVO;
     }
 
     public static List<FieldInfoVO> getFieldInfoVOS(GeneratorContext context) {
@@ -160,6 +165,9 @@ public class GeneratorXmlFileStrService {
         ClazzInfoVO clazzInfoVO = context.getClazzInfoVO();
         StringBuilder methodInfoStr = new StringBuilder();
         clazzInfoVO.getMethodInfos().forEach(methodInfoVO -> {
+            if (!methodInfoVO.getMethodName().endsWith("Batch")) {
+                return;
+            }
             String parameter = "";
             String parameterType = "";
             Map<String, String> methodParameter = methodInfoVO.getMethodParameter();
@@ -168,23 +176,19 @@ public class GeneratorXmlFileStrService {
                 parameter = getClazzType(parameter);
                 parameterType = String.format("parameterType=\"%s\"", parameter);
             }
-            String sql = "";
+            String sql;
             if (methodInfoVO.getMethodName().startsWith(FileDDLTypeEnum.INSERT.getCode())) {
-                if (methodInfoVO.getMethodName().contains("Batch")) {
-                    sql = insertBatchMSql;
-                    if (dataType.equals(DataTypeEnum.MYSQL.name())) {
-                        sql = insertBatchOSql;
-                    }
-                    methodInfoStr.append(getXmlBatchInsertSqlStr(context, sql, methodInfoVO.getMethodName(), parameter, parameterType));
+                sql = insertBatchMSql;
+                if (dataType.equals(DataTypeEnum.MYSQL.name())) {
+                    sql = insertBatchOSql;
                 }
+                methodInfoStr.append(getXmlBatchInsertSqlStr(context, sql, methodInfoVO.getMethodName(), parameter, parameterType));
             } else if (methodInfoVO.getMethodName().startsWith(FileDDLTypeEnum.UPDATE.getCode())) {
-                if (methodInfoVO.getMethodName().contains("Batch")) {
-                    sql = updateBatchMSql;
-                    if (dataType.equals(DataTypeEnum.MYSQL.name())) {
-                        sql = updateBatchOSql;
-                    }
-                    methodInfoStr.append(getXmlBatchUpdateSqlStr(context, sql, methodInfoVO.getMethodName(), parameter, parameterType));
+                sql = updateBatchMSql;
+                if (dataType.equals(DataTypeEnum.MYSQL.name())) {
+                    sql = updateBatchOSql;
                 }
+                methodInfoStr.append(getXmlBatchUpdateSqlStr(context, sql, methodInfoVO.getMethodName(), parameter, parameterType));
             }
         });
         return methodInfoStr.toString();
@@ -194,31 +198,33 @@ public class GeneratorXmlFileStrService {
         ClazzInfoVO clazzInfoVO = context.getClazzInfoVO();
         StringBuilder methodInfoStr = new StringBuilder();
         clazzInfoVO.getMethodInfos().forEach(methodInfoVO -> {
+            if (methodInfoVO.getMethodName().contains("Batch")) {
+                return;
+            }
             if (methodNames.contains(methodInfoVO.getMethodName())) {
                 String parameterType = "";
                 Map<String, String> methodParameter = methodInfoVO.getMethodParameter();
                 if (MapUtils.isNotEmpty(methodParameter) && methodParameter.size() == 1) {
                     String paramName = methodParameter.values().stream().findFirst().get();
                     paramName = getClazzType(paramName);
-                    parameterType = String.format("parameterType=\"%s\"", paramName);
+                    parameterType = String.format("parameterType = \"%s\"", paramName);
                 }
+                String resultCondition = getResultCondition(context, clazzInfoVO, methodInfoVO);
                 if (methodInfoVO.getMethodName().startsWith(FileDDLTypeEnum.INSERT.getCode())) {
                     methodInfoStr.append(getXmlInsertSqlStr(context, methodInfoVO.getMethodName(), parameterType));
                 } else if (methodInfoVO.getMethodName().startsWith(FileDDLTypeEnum.UPDATE.getCode())) {
-                    methodInfoStr.append(getXmlUpdateSqlStr(context, methodInfoVO.getMethodName(), parameterType));
+                    methodInfoStr.append(getXmlUpdateSqlStr(context, methodInfoVO.getMethodName(), parameterType,resultCondition));
                 } else if (methodInfoVO.getMethodName().startsWith(FileDDLTypeEnum.DELETE.getCode())) {
-                    String resultCondition = getResultCondition(context, clazzInfoVO, methodInfoVO);
                     methodInfoStr.append(getXmlDeleteSqlStr(methodInfoVO.getMethodName(), resultCondition));
                 } else {
                     String methodReturn = methodInfoVO.getMethodReturn();
                     methodReturn = getClazzType(methodReturn);
-                    String resultType = "resultType=\"" + methodReturn + "\"";
+                    String resultType = "resultType = \"" + methodReturn + "\"";
                     if (methodReturn.endsWith("DO")) {
                         resultType = "resultMap = \"BaseResultMap\"";
                     } else if (methodReturn.endsWith("VO")) {
                         resultType = "resultMap = \"BaseResultMapVO\"";
                     }
-                    String resultCondition = getResultCondition(context, clazzInfoVO, methodInfoVO);
                     methodInfoStr.append(getXmlSelectSqlStr(methodInfoVO.getMethodName(), parameterType, resultType, resultCondition));
                 }
             }
@@ -257,7 +263,7 @@ public class GeneratorXmlFileStrService {
                     if (JavaTypeEnum.LIST_TYPE.equals(javaTypeEnum)) {
                         resultCondition = "        AND" + getXmlForeachSqlMultiStr(param, StringUtil.textToConstant(idFieldInfoVO.getFieldName()));
                     } else {
-                        resultCondition = String.format("        AND %s = #{%s, jdbcType = %s}", StringUtil.textToConstant(idFieldInfoVO.getFieldName()), param, JavaTypeEnum.getJdbcType(type).name());
+                        resultCondition = String.format("        AND %s = #{%s, jdbcType = %s}\n", StringUtil.textToConstant(idFieldInfoVO.getFieldName()), param, JavaTypeEnum.getJdbcType(type).name());
                     }
                 } else {
                     if (context.getTableInfoVO() == null) {
@@ -375,8 +381,9 @@ public class GeneratorXmlFileStrService {
                     field.append(String.format("        <result column=\"%s\" jdbcType=\"%s\" property=\"%s\" javaType=\"%s\"/>\n", columnName, jdbcType, name, javaType));
                 }
             }
+            return String.format(resultMapVO, getDOInfo(context).getClazzVOName(), field);
         }
-        return String.format(resultMapVO, getDOInfo(context).getClazzVOName(), field);
+        return "";
     }
 
     public static String getXmlSqlTableStr(GeneratorContext context) {
@@ -412,7 +419,7 @@ public class GeneratorXmlFileStrService {
     }
 
 
-    public static String getXmlUpdateSqlStr(GeneratorContext context, String methodName, String parameterType) {
+    public static String getXmlUpdateSqlStr(GeneratorContext context, String methodName, String parameterType, String resultCondition) {
         List<String> fieldList = new ArrayList<>();
         ClazzInfoDOVO doInfo = getDOInfo(context);
         String columnName;
@@ -437,12 +444,8 @@ public class GeneratorXmlFileStrService {
                 name = fieldInfoVO.getFieldName();
                 fieldList.add(String.format("        %s = #{%s, jdbcType=%s}", columnName, name, jdbcType));
             }
-            FieldInfoVO fieldInfoVO = fieldinfos.get(0);
-            name = fieldInfoVO.getFieldName();
-            columnName = StringUtil.textToConstant(name);
-            jdbcType = fieldInfoVO.getFieldJdbcType();
         }
-        fieldList.add(String.format("        WHERE %s = #{%s, jdbcType=%s}", columnName, name, jdbcType));
+        fieldList.add(resultCondition);
         return String.format(updateSql, methodName, parameterType, String.join(",\n", fieldList));
     }
 

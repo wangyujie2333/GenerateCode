@@ -1,6 +1,9 @@
 package com.idea.plugin.orm.support.enums;
 
 import com.google.common.base.CaseFormat;
+import com.idea.plugin.setting.template.JavaTemplateVO;
+import com.idea.plugin.sql.support.GeneralOrmInfoVO;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,15 +11,16 @@ import java.util.stream.Collectors;
 
 public enum MethodEnum {
     INSERT("insert", "int", "%sDO", true),
+    INSERT_BATCH("insertBatch", "int", "java.util.List<%sDO>"),
     UPDATE("update", "int", "%sDO", true),
-    INSERT_BATCH("insertBatch", "int", "List<%sDO>"),
-    UPDATE_BATCH("updateBatch", "int", "List<%sDO>"),
-    DELETE_BY_ID("deleteById", "int", "String", true),
-    DELETE_BY_IDS("deleteByIds", "int", "List<String>"),
-    DELETE_BY_VO("deleteByVO", "int", "%sVO"),
-    SELECT_BY_ID("selectById", "%sDO", "String", true),
-    SELECT_BY_IDS("selectByIds", "%sDO", "List<String>"),
-    SELECT_BY_DO("selectByVO", "%sDO", "%sVO"),
+    UPDATE_BY_IDS("updateByIds", "int", "java.util.List<java.lang.String>"),
+    UPDATE_BATCH("updateBatch", "int", "java.util.List<%sDO>"),
+    DELETE_BY_ID("deleteById", "int", "java.lang.String", true),
+    DELETE_BY_IDS("deleteByIds", "int", "java.util.List<java.lang.String>"),
+    DELETE_BY_DO("deleteByDO", "int", "%sDO"),
+    SELECT_BY_ID("selectById", "%sDO", "java.lang.String", true),
+    SELECT_BY_IDS("selectByIds", "%sDO", "java.util.List<java.lang.String>", true),
+    SELECT_BY_DO("selectByDO", "%sDO", "%sDO", true),
     ;
     private String code;
     private Boolean def;
@@ -44,21 +48,46 @@ public enum MethodEnum {
         return def;
     }
 
-    public String getRet(String str) {
-        String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, str.replaceAll("(^[A-Z]){1}[_]{1}", ""));
-        if (ret.contains("%s")) {
-            return String.format(ret, name);
+    public String getRet(String str, JavaTemplateVO javaTemplateVO) {
+        if (!ret.contains("%s")) {
+            return ret;
         }
-        return ret;
+        String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, str.replaceAll("(^[A-Z]){1}[_]{1}", ""));
+        String fileName = getFileName(javaTemplateVO);
+        if (StringUtils.isEmpty(fileName)) {
+            fileName = ret;
+        }
+        return String.format(fileName, name);
     }
 
-    public String getParam(String str) {
-        String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, str.replaceAll("(^[A-Z]){1}[_]{1}", ""));
-        if (param.contains("%s")) {
-            return String.format(param, name);
+    public String getParam(String str, JavaTemplateVO javaTemplateVO, GeneralOrmInfoVO generalOrmInfoVO) {
+        if (!param.contains("%s")) {
+            return param;
         }
-        return param;
+        String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, str.replaceAll("(^[A-Z]){1}[_]{1}", ""));
+        String fileName = getFileName(javaTemplateVO);
+        if (StringUtils.isEmpty(fileName)) {
+            fileName = param;
+        }
+        fileName = (FileTypePathEnum.DO.getJavapath(generalOrmInfoVO) + "/" + fileName).replaceAll("/", ".");
+        return String.format(fileName, name);
     }
+
+    private String getFileName(JavaTemplateVO javaTemplateVO) {
+        String fileName = null;
+        if (javaTemplateVO != null) {
+            JavaTemplateVO.OrmTemplateVO ormTemplateVO;
+            if (JavaTemplateVO.isJpa(javaTemplateVO)) {
+                ormTemplateVO = javaTemplateVO.getJpa();
+            } else {
+                ormTemplateVO = javaTemplateVO.getMybatis();
+            }
+            fileName = ormTemplateVO.getDO();
+
+        }
+        return fileName;
+    }
+
 
     public static List<String> getDefaultMthods() {
         return Arrays.stream(MethodEnum.values()).filter(methodEnum -> Boolean.TRUE.equals(methodEnum.def)).map(MethodEnum::getCode).collect(Collectors.toList());

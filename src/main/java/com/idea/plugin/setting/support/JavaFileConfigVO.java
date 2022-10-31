@@ -22,6 +22,9 @@ public class JavaFileConfigVO extends BaseConfigVO {
     public String controllerPath;
     public String controllerReturn;
 
+    public JavaFileConfigVO() {
+    }
+
     public void copy(TableConfigVO configVO) {
         setDO(configVO.getProcedureTypeList().stream().anyMatch(procedureType -> FileTypePathEnum.DO.name().equals(procedureType)));
         setDAO(configVO.getProcedureTypeList().stream().anyMatch(procedureType -> FileTypePathEnum.DAO.name().equals(procedureType)));
@@ -29,7 +32,7 @@ public class JavaFileConfigVO extends BaseConfigVO {
         setCONTROLLER(configVO.getProcedureTypeList().stream().anyMatch(procedureType -> FileTypePathEnum.CONTROLLER.name().equals(procedureType)));
     }
 
-    public boolean isDO() {
+    public boolean getDO() {
         return DO;
     }
 
@@ -37,7 +40,7 @@ public class JavaFileConfigVO extends BaseConfigVO {
         this.DO = DO;
     }
 
-    public boolean isDAO() {
+    public boolean getDAO() {
         return DAO;
     }
 
@@ -45,7 +48,7 @@ public class JavaFileConfigVO extends BaseConfigVO {
         this.DAO = DAO;
     }
 
-    public boolean isSERVICE() {
+    public boolean getSERVICE() {
         return SERVICE;
     }
 
@@ -53,7 +56,7 @@ public class JavaFileConfigVO extends BaseConfigVO {
         this.SERVICE = SERVICE;
     }
 
-    public boolean isCONTROLLER() {
+    public boolean getCONTROLLER() {
         return CONTROLLER;
     }
 

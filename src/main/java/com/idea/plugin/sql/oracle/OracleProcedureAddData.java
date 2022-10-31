@@ -8,8 +8,7 @@ public class OracleProcedureAddData extends AbstractProcedureService {
             "CREATE OR REPLACE PROCEDURE INSERT_${shortName}_DATA${columnParams}\n" +
                     "${columnNameDeclare}\n" +
                     "CURSOR CUR_TABLE_DATA_LOOP IS SELECT * \n" +
-                    "                              FROM ${tableName}" +
-                    "${columnCondition}\n" +
+                    "                              FROM ${tableName}${columnCondition}\n" +
                     "BEGIN\n" +
                     "OPEN CUR_TABLE_DATA_LOOP;\n" +
                     "    LOOP\n" +

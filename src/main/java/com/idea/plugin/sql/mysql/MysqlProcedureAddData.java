@@ -12,8 +12,7 @@ public class MysqlProcedureAddData extends AbstractProcedureService {
                     "${columnNameDeclare}\n" +
                     "    DECLARE DONE INT;\n" +
                     "    DECLARE CUR_TABLE_DATA_LOOP CURSOR FOR SELECT * \n" +
-                    "                                           FROM ${tableName}" +
-                    "${columnCondition}\n" +
+                    "                                           FROM ${tableName}${columnCondition}\n" +
                     "    DECLARE CONTINUE HANDLER FOR NOT FOUND SET DONE = 1;\n" +
                     "\n" +
                     "OPEN CUR_TABLE_DATA_LOOP;\n" +

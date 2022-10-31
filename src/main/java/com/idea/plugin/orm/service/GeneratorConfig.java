@@ -18,7 +18,7 @@ public class GeneratorConfig {
 
     private static FreemarkerConfiguration freemarker = new FreemarkerConfiguration("/template");
 
-    protected Template getTemplate(String ftl) throws IOException {
+    protected static Template getTemplate(String ftl) throws IOException {
         return freemarker.getTemplate(ftl, ENCODING);
     }
 
@@ -32,7 +32,7 @@ public class GeneratorConfig {
 
     }
 
-    public <T extends TableModule> String getTemplate(Object module, String ftlpath) throws IOException, TemplateException {
+    public static <T extends TableModule> String getTemplate(Object module, String ftlpath) throws IOException, TemplateException {
         StringWriter stringWriter = new StringWriter();
         Template template = getTemplate(ftlpath);
         template.process(module, stringWriter);

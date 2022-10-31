@@ -271,16 +271,16 @@ public class CreateDemoFileUI {
     public void fillData() {
         JavaFileConfigVO javaFileConfigVO = ToolSettings.getJavaFileConfig();
         config.procedureTypeList = new ArrayList<>();
-        if (javaFileConfigVO.isDO()) {
+        if (javaFileConfigVO.getDO()) {
             config.procedureTypeList.add(FileTypePathEnum.DO.name());
         }
-        if (javaFileConfigVO.isDAO()) {
+        if (javaFileConfigVO.getDAO()) {
             config.procedureTypeList.add(FileTypePathEnum.DAO.name());
         }
-        if (javaFileConfigVO.isSERVICE()) {
+        if (javaFileConfigVO.getSERVICE()) {
             config.procedureTypeList.add(FileTypePathEnum.SERVICE.name());
         }
-        if (javaFileConfigVO.isCONTROLLER()) {
+        if (javaFileConfigVO.getCONTROLLER()) {
             config.procedureTypeList.add(FileTypePathEnum.CONTROLLER.name());
         }
     }
@@ -288,7 +288,7 @@ public class CreateDemoFileUI {
 
     public static class ChooseStringDialog extends ChooseElementsDialog<String> {
         public ChooseStringDialog(Project project, List<String> names, String title, String description) {
-            super(project, names, title, description, true);
+            super(project, names, title, description, false);
         }
 
         public void setMutilSelectionMode() {

@@ -99,23 +99,23 @@ public abstract class TableModule {
     }
 
     public String getEntityName() {
-        return FileTypePathEnum.DO.getFileName(tableInfoVO.tableName);
+        return FileTypePathEnum.DO.getFileName(tableInfoVO.tableName, context.getJavaTemplateVO());
     }
 
     public String getVoName() {
-        return FileTypePathEnum.VO.getFileName(tableInfoVO.tableName);
+        return FileTypePathEnum.VO.getFileName(tableInfoVO.tableName, context.getJavaTemplateVO());
     }
 
     public String getMapperName() {
-        return FileTypePathEnum.MAPPER.getFileName(tableInfoVO.tableName);
+        return FileTypePathEnum.MAPPER.getFileName(tableInfoVO.tableName, context.getJavaTemplateVO());
     }
 
     public String getIserviceName() {
-        return FileTypePathEnum.ISERVICE.getFileName(tableInfoVO.tableName);
+        return FileTypePathEnum.ISERVICE.getFileName(tableInfoVO.tableName, context.getJavaTemplateVO());
     }
 
     public String getServiceName() {
-        return FileTypePathEnum.SERVICE.getFileName(tableInfoVO.tableName);
+        return FileTypePathEnum.SERVICE.getFileName(tableInfoVO.tableName, context.getJavaTemplateVO());
     }
 
 }

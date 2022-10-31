@@ -19,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -155,7 +156,7 @@ public class CreateJavaFileUI {
         methodListText.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                List<String> methods = Arrays.stream(MethodEnum.values()).map(MethodEnum::getCode).collect(Collectors.toList());
+                List<String> methods = Arrays.stream(MethodEnum.values()).sorted(Comparator.comparing(MethodEnum::ordinal)).map(MethodEnum::getCode).collect(Collectors.toList());
                 CreateDemoFileUI.ChooseStringDialog dialog = new CreateDemoFileUI.ChooseStringDialog(project, methods, "Choose Method", "Choose Generate Method");
                 dialog.setSize(400, 400);
                 dialog.show();
@@ -248,16 +249,16 @@ public class CreateJavaFileUI {
         TableConfigVO tableConfig = ToolSettings.getTableConfig();
         setProcedureSelected(config);
         tableConfig.procedureTypeList = new ArrayList<>();
-        if (config.isDO()) {
+        if (config.getDO()) {
             tableConfig.procedureTypeList.add(FileTypePathEnum.DO.name());
         }
-        if (config.isDAO()) {
+        if (config.getDAO()) {
             tableConfig.procedureTypeList.add(FileTypePathEnum.DAO.name());
         }
-        if (config.isSERVICE()) {
+        if (config.getSERVICE()) {
             tableConfig.procedureTypeList.add(FileTypePathEnum.SERVICE.name());
         }
-        if (config.isCONTROLLER()) {
+        if (config.getCONTROLLER()) {
             tableConfig.procedureTypeList.add(FileTypePathEnum.CONTROLLER.name());
         }
     }

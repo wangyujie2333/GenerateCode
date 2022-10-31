@@ -52,19 +52,18 @@ public class JavaFilePopupAction extends BaseAction {
                     generalOrmInfoVO.setAuthor(ToolSettings.getSettingConfig().getAuthor());
                     generalOrmInfoVO.setMethods(javaFileConfig.getMethods());
                     generalOrmInfoVO.setTableInfos(Collections.singletonList(tableOrmInfoVO));
-                    ProjectGenerator projectGenerator = new ProjectGenerator();
                     String interfaceClazz = Arrays.stream(context.getVirtualFiles()).filter(it -> it.getPath().endsWith(("java")))
                             .map(virtualFile -> virtualFile.getName().substring(0, virtualFile.getName().lastIndexOf("."))).collect(Collectors.joining(";"));
                     if (StringUtils.isNotEmpty(interfaceClazz)) {
                         tableOrmInfoVO.setInterfaceClazz(interfaceClazz);
-                        CreateFileUtils.generalFromFile(generalOrmInfoVO, context, projectGenerator, tableOrmInfoVO);
+                        CreateFileUtils.generalFromFile(generalOrmInfoVO, context, tableOrmInfoVO);
                         NoticeUtil.info("文件创建成功, 路径: " + generalOrmInfoVO.modulePath);
                     } else if (context.getPsiElements().length > 0) {
                         List<DbTable> dbTables = Arrays.stream(context.getPsiElements()).filter(it -> it instanceof DbTable).map(it -> (DbTable) it).collect(Collectors.toList());
                         for (DbTable dbTable : dbTables) {
                             Class<GeneralOrmInfoVO> generalOrmInfoVOClass = GeneralOrmInfoVO.class;
                             Class<TableOrmInfoVO> tableOrmInfoVOClass = TableOrmInfoVO.class;
-                            CreateFileUtils.generalFromDbTable(generalOrmInfoVO, projectGenerator, generalOrmInfoVOClass, tableOrmInfoVOClass, dbTable);
+                            CreateFileUtils.generalFromDbTable(generalOrmInfoVO, generalOrmInfoVOClass, tableOrmInfoVOClass, dbTable);
                         }
                         NoticeUtil.info("文件创建成功, 路径: " + generalOrmInfoVO.modulePath);
                     }

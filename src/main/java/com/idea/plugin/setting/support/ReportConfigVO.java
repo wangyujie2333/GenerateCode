@@ -27,6 +27,7 @@ public class ReportConfigVO extends BaseConfigVO {
     public KeyTemplateVO keyTemplate;
     public MdTemplateVO mdTemplate;
     public SqlTemplateVO sqlTemplateVO;
+    public JavaTemplateVO javaTemplateVO;
     public LogTemplateVO logTemplate;
     public Map<String, String> wordTemplate;
     public Map<String, String> wordTranslate;
@@ -58,6 +59,7 @@ public class ReportConfigVO extends BaseConfigVO {
             keyTemplate = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.keyTemplate), KeyTemplateVO.class);
             mdTemplate = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.mdTemplate), MdTemplateVO.class);
             sqlTemplateVO = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.sqlTemplate), SqlTemplateVO.class);
+            javaTemplateVO = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.javatemplate), JavaTemplateVO.class);
             wordTemplate = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.wordTemplate), Map.class);
             wordTranslate = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.wordTranslate), Map.class);
         }
@@ -69,7 +71,7 @@ public class ReportConfigVO extends BaseConfigVO {
                 settingConfig.setReplaceText(setting.getReplace().getReplaceText());
             }
             if (StringUtils.isNotEmpty(setting.getWordJsonMap())) {
-                String wordJson = Arrays.stream(setting.getWordJsonMap().split(";")).map(String::trim).collect(Collectors.joining("\n"));
+                String wordJson = Arrays.stream(setting.getWordJsonMap().split(";")).map(String::trim).distinct().collect(Collectors.joining("\n"));
                 wordJson = JsonUtil.propertyToJson(wordJson);
                 Map<String, String> wordTransMap = JsonUtil.fromJson(wordJson, Map.class);
                 translateConfig.setWordJsonMap(wordTransMap);
@@ -159,6 +161,14 @@ public class ReportConfigVO extends BaseConfigVO {
 
     public void setSqlTemplateVO(SqlTemplateVO sqlTemplateVO) {
         this.sqlTemplateVO = sqlTemplateVO;
+    }
+
+    public JavaTemplateVO getJavaTemplateVO() {
+        return javaTemplateVO;
+    }
+
+    public void setJavaTemplateVO(JavaTemplateVO javaTemplateVO) {
+        this.javaTemplateVO = javaTemplateVO;
     }
 
     public Map<String, String> getWordTemplate() {

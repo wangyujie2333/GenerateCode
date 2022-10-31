@@ -130,6 +130,7 @@ public class DemoFileStrUtils {
         StringBuilder javaFileStr = new StringBuilder("-- 创建java文件配置参数\n" +
                 "author:" + configVO.author + "\n" +
                 "modulePath:" + javaFileConfig.modulePath + "\n" +
+                "modulePath:" + javaFileConfig.modulePath + "\n" +
                 "methods:" + String.join(",", javaFileConfig.getMethods()) + "\n" +
                 "doPath:" + javaFileConfig.doPath + "\n" +
                 "voPath:" + javaFileConfig.voPath + "\n" +

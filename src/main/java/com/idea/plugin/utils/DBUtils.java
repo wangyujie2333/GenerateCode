@@ -86,7 +86,7 @@ public class DBUtils {
     }
 
 
-    public static void getRowValues(ResultSet resultSet, ResultSetMetaData metaData, Map<String, String> newIdCacheMap, List<String> mysqlValueList, List<String> oracleValueList, List<String> declareColumns, List<String> dbmsLobCreates, List<String> dbmsLobApends) throws Exception {
+    public static void getRowValues(ResultSet resultSet, ResultSetMetaData metaData, Map<String, String> newIdCacheMap, List<String> mysqlValueList, List<String> oracleValueList, List<String> declareColumns, List<String> dbmsLobCreates, List<String> dbmsLobApends, int dataIdx) throws Exception {
         for (int i = 2; i <= metaData.getColumnCount(); i++) {
             String columnLabel = metaData.getColumnLabel(i).toUpperCase();
             String columnClassName = metaData.getColumnClassName(i);
@@ -97,6 +97,24 @@ public class DBUtils {
                 if ("UUID".equalsIgnoreCase(value.toString())) {
                     value = "'" + UUID.randomUUID().toString().replace("-", "") + "'";
                     newIdCacheMap.put(columnLabel, value.toString());
+                } else if (value.toString().toUpperCase().startsWith("ROWNUM")) {
+                    int init = 0;
+                    int step = 1;
+                    if (value.toString().length() > 8) {
+                        String[] args = value.toString().trim().substring(7, value.toString().length() - 1).split(",");
+                        for (int j = 0; j < args.length; j++) {
+                            try {
+                                if (j == 0) {
+                                    init = Integer.parseInt(args[j]);
+                                }
+                                if (j == 1) {
+                                    step = Integer.parseInt(args[j]);
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                    value = init + dataIdx * step;
                 } else if ("SYSDATE".equalsIgnoreCase(value.toString())) {
                     mValue = "SYSDATE()";
                     oValue = "SYSDATE";
@@ -180,6 +198,12 @@ public class DBUtils {
             }
             int dataIdx = 0;
             List<InsertDataInfoVO> insertDataInfoVOS = new ArrayList<>();
+            List<Map<String, String>> preIdCacheList = generalSqlInfoVO.getNewIdCacheMapList();
+            Map<String, String> preIdCacheMap = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(preIdCacheList)) {
+                preIdCacheMap = preIdCacheList.get(0);
+            }
+
             while (resultSet.next()) {
                 InsertDataInfoVO insertDataInfoVO = new InsertDataInfoVO();
                 insertDataInfoVO.setCodes(codeList);
@@ -188,17 +212,16 @@ public class DBUtils {
                 insertDataInfoVO.setIdValue(idValue);
                 insertDataInfoVO.getMvalues().add(idValue);
                 insertDataInfoVO.getOvalues().add(idValue);
-                List<Map<String, String>> newIdCacheList = generalSqlInfoVO.getNewIdCacheMapList();
                 Map<String, String> newIdCacheMap = null;
-                if (newIdCacheList.size() > dataIdx) {
-                    newIdCacheMap = newIdCacheList.get(dataIdx);
+                if (preIdCacheList.size() > dataIdx) {
+                    newIdCacheMap = preIdCacheList.get(dataIdx);
                 }
                 if (newIdCacheMap == null) {
-                    newIdCacheMap = new HashMap<>();
-                    newIdCacheList.add(newIdCacheMap);
+                    newIdCacheMap = new HashMap<>(preIdCacheMap);
+                    preIdCacheList.add(newIdCacheMap);
                 }
                 newIdCacheMap.put(idCode, idValue);
-                getRowValues(resultSet, metaData, newIdCacheMap, insertDataInfoVO.getMvalues(), insertDataInfoVO.getOvalues(), insertDataInfoVO.getDeclareColumns(), insertDataInfoVO.getDbmsLobCreates(), insertDataInfoVO.getDbmsLobApends());
+                getRowValues(resultSet, metaData, newIdCacheMap, insertDataInfoVO.getMvalues(), insertDataInfoVO.getOvalues(), insertDataInfoVO.getDeclareColumns(), insertDataInfoVO.getDbmsLobCreates(), insertDataInfoVO.getDbmsLobApends(), dataIdx);
                 insertDataInfoVOS.add(insertDataInfoVO);
                 ++dataIdx;
             }
@@ -404,13 +427,15 @@ public class DBUtils {
             }
             String codes = String.join(", ", codeList);
             String idValue = "";
+            int dataIdx = 0;
             if (resultSet.next()) {
                 List<String> rowValues = new ArrayList<>();
                 idValue = DBUtils.getIdValue(resultSet.getString(1));
                 rowValues.add(idValue);
-                getRowValues(resultSet, metaData, new HashMap<>(), rowValues, new ArrayList<>(), null, null, null);
+                getRowValues(resultSet, metaData, new HashMap<>(), rowValues, new ArrayList<>(), null, null, null, dataIdx);
                 String values = String.join(", ", rowValues);
                 tableInfoVO.addInsertData("INSERT INTO " + tableInfoVO.tableName + " (" + codes + ") VALUES (" + values + ");");
+                ++dataIdx;
             }
             int maxCode = codeList.stream().max(Comparator.comparing(String::length)).get().trim().length();
             String codeAlias = codeList.stream().map(code -> code + StringUtil.getBlank(code, maxCode) + " AS " + code).collect(Collectors.joining(",\n                 "));

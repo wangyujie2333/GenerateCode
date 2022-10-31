@@ -7,6 +7,7 @@ public class SubTemplateVO {
     public String keyTemplate;
     public String wordTranslate;
     public String sqlTemplate;
+    public String javatemplate;
 
     public SubTemplateVO() {
     }
@@ -49,5 +50,13 @@ public class SubTemplateVO {
 
     public void setSqlTemplate(String sqlTemplate) {
         this.sqlTemplate = sqlTemplate;
+    }
+
+    public String getJavatemplate() {
+        return javatemplate;
+    }
+
+    public void setJavatemplate(String javatemplate) {
+        this.javatemplate = javatemplate;
     }
 }

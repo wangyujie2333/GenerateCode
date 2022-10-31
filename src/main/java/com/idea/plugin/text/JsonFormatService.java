@@ -60,7 +60,7 @@ public class JsonFormatService {
             }
             if (StringUtils.isNotEmpty(LogParser.toSql(text))) {
                 instance.switchMenu(ToolMenu.SQL);
-                instance.sqlMenu.setSelectedItem(2);
+                instance.switchMenu(instance.sqlMenu.getItemAt(2));
                 return text;
             }
         }
@@ -79,7 +79,7 @@ public class JsonFormatService {
             }
             if (StringUtils.isNotEmpty(LogParser.toSql(text))) {
                 instance.switchMenu(ToolMenu.SQL);
-                instance.sqlMenu.setSelectedItem(2);
+                instance.switchMenu(instance.sqlMenu.getItemAt(2));
                 return text;
             }
         }
@@ -94,7 +94,7 @@ public class JsonFormatService {
         } else {
             if (StringUtils.isNotEmpty(LogParser.toSql(text))) {
                 instance.switchMenu(ToolMenu.SQL);
-                instance.sqlMenu.setSelectedItem(2);
+                instance.switchMenu(instance.sqlMenu.getItemAt(2));
                 return text;
             }
             instance.switchMenu(ToolMenu.JSON);

@@ -25,7 +25,7 @@ public class MysqlProcedureAddTableService extends BaseProcedureService {
         String procedure = procedureService.getProcedure();
         Integer length = tableSqlInfoVO.getFieldInfos().stream().map(fieldInfo -> fieldInfo.columnName.length()).max(Comparator.comparing(Integer::intValue)).get();
         String call = tableSqlInfoVO.getFieldInfos().stream().map(fieldVO -> {
-                    String format = String.format(procedureService.getCall(), StringUtil.getBlank(fieldVO.columnName, length), fieldVO.columnType.getMtype(fieldVO.columnTypeArgs), fieldVO.nullType.getCode(), fieldVO.comment);
+                    String format = String.format(procedureService.getCall(), fieldVO.columnName + StringUtil.getBlank(fieldVO.columnName, length), fieldVO.columnType.getMtype(fieldVO.columnTypeArgs), fieldVO.nullType.getCode(), fieldVO.comment);
                     if (PrimaryTypeEnum.PRIMARY.equals(fieldVO.primary)) {
                         format = format + fieldVO.primary.getCode();
                     }

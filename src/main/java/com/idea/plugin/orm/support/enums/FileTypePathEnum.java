@@ -1,6 +1,7 @@
 package com.idea.plugin.orm.support.enums;
 
 import com.google.common.base.CaseFormat;
+import com.idea.plugin.setting.template.JavaTemplateVO;
 import com.idea.plugin.sql.support.GeneralOrmInfoVO;
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,10 +48,12 @@ public enum FileTypePathEnum {
                 subpath = StringUtils.isEmpty(generalOrmInfoVO.daoPath) ? javapath : generalOrmInfoVO.daoPath;
                 break;
             case MAPPER_MYSQL:
-                subpath = StringUtils.isEmpty(generalOrmInfoVO.daoMysqlPath) ? javapath : generalOrmInfoVO.daoMysqlPath;
+                String daopath = StringUtils.isEmpty(generalOrmInfoVO.daoPath) ? javapath : generalOrmInfoVO.daoPath;
+                subpath = StringUtils.isEmpty(generalOrmInfoVO.daoMysqlPath) ? daopath : generalOrmInfoVO.daoMysqlPath;
                 break;
             case MAPPER_ORACLE:
-                subpath = StringUtils.isEmpty(generalOrmInfoVO.daoOraclePath) ? javapath : generalOrmInfoVO.daoOraclePath;
+                daopath = StringUtils.isEmpty(generalOrmInfoVO.daoPath) ? javapath : generalOrmInfoVO.daoPath;
+                subpath = StringUtils.isEmpty(generalOrmInfoVO.daoOraclePath) ? daopath : generalOrmInfoVO.daoOraclePath;
                 break;
             case ISERVICE:
                 subpath = StringUtils.isEmpty(generalOrmInfoVO.iservicePath) ? javapath : generalOrmInfoVO.iservicePath;
@@ -75,13 +78,62 @@ public enum FileTypePathEnum {
         return ftlpath;
     }
 
-    public String getFileName(String tableName) {
+    public String getFileName(String tableName, JavaTemplateVO javaTemplateVO) {
         String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, tableName.replaceAll("(^[A-Z]){1}[_]{1}", ""));
+        String fileName = getFileName(javaTemplateVO);
         return String.format(fileName, name);
     }
 
-    public String getClazzFileName(String clazzName) {
+    public String getClazzFileName(String clazzName, JavaTemplateVO javaTemplateVO) {
+        String fileName = getFileName(javaTemplateVO);
         return String.format(fileName, getClazzEntiyName(clazzName));
+    }
+
+    private String getFileName(JavaTemplateVO javaTemplateVO) {
+        String fileName = this.fileName;
+        if (javaTemplateVO != null) {
+            JavaTemplateVO.OrmTemplateVO ormTemplateVO;
+            if (JavaTemplateVO.isJpa(javaTemplateVO)) {
+                ormTemplateVO = javaTemplateVO.getJpa();
+            } else {
+                ormTemplateVO = javaTemplateVO.getMybatis();
+            }
+            switch (this) {
+                case DO:
+                    fileName = ormTemplateVO.getDO();
+                    break;
+                case VO:
+                    fileName = ormTemplateVO.getVO();
+                    break;
+                case DAO:
+                    fileName = ormTemplateVO.getDAO();
+                    break;
+                case MAPPER:
+                    fileName = ormTemplateVO.getMAPPER();
+                    break;
+                case MAPPER_MYSQL:
+                    fileName = ormTemplateVO.getMAPPER_MYSQL();
+                    break;
+                case MAPPER_ORACLE:
+                    fileName = ormTemplateVO.getMAPPER_ORACLE();
+                    break;
+                case ISERVICE:
+                    fileName = ormTemplateVO.getISERVICE();
+                    break;
+                case SERVICE:
+                    fileName = ormTemplateVO.getSERVICE();
+                    break;
+                case CONTROLLER:
+                    fileName = ormTemplateVO.getCONTROLLER();
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (StringUtils.isEmpty(fileName)) {
+            fileName = this.fileName;
+        }
+        return fileName;
     }
 
     public String getClazzEntiyName(String clazzName) {

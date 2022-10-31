@@ -98,6 +98,9 @@ public enum JavaTypeEnum {
 
     public boolean isImport() {
         return this.equals(BIGDECIMAL_TYPE)
+                || this.equals(TIMESTAMP_TYPE)
+                || this.equals(LOCAL_DATE_TYPE)
+                || this.equals(LOCAL_DATE_TIME_TYPE)
                 || this.equals(DATE_TYPE)
                 || this.equals(LIST_TYPE)
                 || this.equals(MAP_TYPE);

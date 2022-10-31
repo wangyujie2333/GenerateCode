@@ -132,7 +132,7 @@ public class SqlTemplateModeule extends TemplateModule {
             }
         } else {
             if (isMysql()) {
-                columnParams = columnParams;
+                columnParams = "()";
             } else if (isOracle()) {
                 columnParams = columnParams + " IS";
             }
@@ -145,10 +145,10 @@ public class SqlTemplateModeule extends TemplateModule {
         if (isParam() && tableSqlInfoVO.insertColumnParam != null) {
             String[] columnParamArr = tableSqlInfoVO.insertColumnParam.split(",");
             columnCondition = columnParamArr[0].trim() + " = " + "P_" + columnParamArr[0].trim();
-            String condition = "                                           WHERE %s\n                                             AND NOT EXISTS(SELECT 1 FROM %s T WHERE T.%s);";
+            String condition = "\n                                           WHERE %s;\n                                             AND NOT EXISTS(SELECT 1 FROM %s T WHERE T.%s);";
             return String.format(condition, columnCondition, tableSqlInfoVO.tableName, columnCondition);
         }
-        return ";";
+        return ";\n";
     }
 
     public String param() {
