@@ -1,7 +1,9 @@
 package com.idea.plugin.setting;
 
 import com.idea.plugin.popup.module.ActionContext;
+import com.idea.plugin.report.service.ReportGenerator;
 import com.idea.plugin.setting.support.*;
+import com.idea.plugin.utils.JsonUtil;
 import com.idea.plugin.utils.ThreadLocalUtils;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
@@ -64,8 +66,10 @@ public class ToolSettings implements PersistentStateComponent<ToolsConfigVO> {
 
     public static ReportConfigVO getReportConfig() {
         ToolsConfigVO config = getConfig();
-        if (config.reportConfigVO == null) {
-            config.reportConfigVO = new ReportConfigVO();
+        if (config.reportConfigVO == null || config.reportConfigVO.getOpen() == null) {
+            ReportGenerator reportGenerator = new ReportGenerator();
+            String reportConfig = reportGenerator.getReportConfig();
+            config.reportConfigVO = JsonUtil.fromJson(reportConfig, ReportConfigVO.class);
         }
         return config.reportConfigVO;
     }
