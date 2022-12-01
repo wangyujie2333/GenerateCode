@@ -74,7 +74,7 @@
             </action>
         </group>
         <action id="Copy Build File" class="com.idea.plugin.popup.CopyBuildFileAction" text="Copy Build File"
-                description="Copy Build File">
+                description="Copy build file">
             <add-to-group group-id="CopyReferencePopupGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift C"/>
         </action>

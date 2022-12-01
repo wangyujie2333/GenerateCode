@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class GitNewFeatureBranchAction extends BaseAction {
 
-    private static GitService gitService = new GitService();
+    private static final GitService gitService = new GitService();
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -64,8 +64,7 @@ public class GitNewFeatureBranchAction extends BaseAction {
                 new Task.Backgroundable(context.getProject(), newBranchName, false) {
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
-                        String currentBranchName = repository.getCurrentBranch().getName();
-                        gitService.newNewBranchByLocalBranch(repository, currentBranchName, newBranchName);
+                        gitService.newNewBranchByLocalBranch(repository, newBranchName);
                         repository.update();
                         VirtualFileManager.getInstance().asyncRefresh(null);
                     }
