@@ -1,9 +1,9 @@
 {
-  "author": "wangyuj",
+  "open": false,
   "period": 5000,
   "filePath": "C:\\Users\\jimmy\\AppData\\Roaming\\JetBrains\\IntelliJIdea2022.2\\scratches\\Diary",
   "backupfromPath": "C:\\Users\\jimmy\\AppData\\Roaming\\JetBrains\\IntelliJIdea2022.2\\scratches",
-  "backuptoPath": "C:/Users/jimmy/OneDrive/文档/scratches",
+  "backuptoPath": "C:/Users/jimmy/OneDrive/文档/工作文档",
   "archive": {
     "isarchive": false,
     "archivePath": "/archive",
@@ -28,22 +28,37 @@
     "mdTemplate": "/template/json/mdtemplate.json",
     "sqlTemplate": "/template/json/sqltemplate.json",
     "keyTemplate": "/template/json/keytemplate.json",
-    "wordTranslate": "/template/json/wordtranslate.json"
+    "wordTranslate": "/template/json/wordtranslate.json",
+    "javatemplate": "/template/json/javatemplate.json"
   },
   "logTemplate": {
-    "serial": "JSON.toJSONString(%s)",
+    "serial": "JsonUtils.toJSON(%s)",
     "logCommon": "logger.info(\"method {} variable {} is {}\", %s, %s, %s);",
-    "logEnter": "logger.debug(\"enter method: {}, param is: {}\", %s);",
-    "logEnterMsg": "methodName,params",
-    "logLeave": "logger.debug(\"leave method: {}, return is: {} \", %s);",
-    "logLeaverMsg": "methodName,return",
-    "logError": "logger.error(\"{} error msg is:{}\", %s, %s.getLocalizedMessage(), %s);"
+    "logEnter": "logger.debug(LogConstants.LOG_LEAVE_METHOD, %s);",
+    "logEnter1": "logger.debug(\"enter method: {}, param is: {}\", %s);",
+    "logEnterMsg": "methodName",
+    "logLeave": "logger.debug(LogConstants.LOG_LEAVE_METHOD, %s);",
+    "logLeave1": "logger.debug(\"leave method: {}, return is: {} \", %s);",
+    "logLeaverMsg": "methodName",
+    "logError": "logger.error(\"{} error msg is:{}\", %s, %s.getLocalizedMessage(), %s);",
+    "logParam": "methodName,params,return"
   },
   "setting": {
+    "copyFile": {
+      "sourceCode": false,
+      "filePathCache": "C:\\Users\\jimmy\\OneDrive\\文档\\增量文件",
+      "folderName": "默认文件名称"
+    },
     "replace": {
       "replace": true,
       "replaceText": "，,|。.|；;|！!|？?|：:|“\"|”\"|‘'|、/|（(|）)|【[|】]|《<|》>|"
     },
-    "wordJsonMap":"id:主键;ids:主键列表;vo:值对象;do:实体类;vos:值对象列表;dos:实体类列表;dim:维度;util:工具类;utils:工具类;set:设置;get:获取;code:编码;org:组织;value:值;map:键值对;msg:信息;"
+    "wordJsonMap": "row:行;num:号码;no:号码;ocr:OCR识别;eim:影像;eims:影像;field:字段;bill:单据;id:主键;ids:主键列表;vo:值对象;do:实体类;vos:值对象列表;dos:实体类列表;dim:维度;util:工具类;utils:工具类;set:设置;get:获取;code:编码;org:组织;value:值;map:键值对;msg:信息;"
+  },
+  "gitSetting": {
+    "branchKey": {
+      "mfeature": "mfeature",
+      "mbug": "mbug"
+    }
   }
 }

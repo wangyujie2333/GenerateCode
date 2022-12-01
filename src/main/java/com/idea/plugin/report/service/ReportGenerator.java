@@ -1,7 +1,7 @@
 package com.idea.plugin.report.service;
 
-import com.idea.plugin.api.WanNianLiService;
 import com.idea.plugin.orm.service.GeneratorConfig;
+import com.idea.plugin.popup.module.ActionContext;
 import com.idea.plugin.report.support.ReportContext;
 import com.idea.plugin.report.support.ReportModuleFactory;
 import com.idea.plugin.report.support.enums.ReportTypeEnum;
@@ -12,11 +12,12 @@ import com.idea.plugin.setting.template.MdTemplateVO;
 import com.idea.plugin.setting.template.TemplateTaskPathEnum;
 import com.idea.plugin.setting.template.TemplateTaskVO;
 import com.idea.plugin.utils.*;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -31,6 +32,29 @@ public class ReportGenerator extends GeneratorConfig {
     private static Boolean taskRun = false;
 
     public ReportGenerator() {
+    }
+
+    public void initReportConfig(ActionContext context) {
+        try {
+            ReportConfigVO reportConfigVO = null;
+            try {
+                reportConfigVO = JsonUtil.fromJson(context.getEditorText(), ReportConfigVO.class);
+            } catch (Exception ignored) {
+            }
+            if (reportConfigVO == null) {
+                String reportConfig = getReportConfig();
+                reportConfigVO = JsonUtil.fromJson(reportConfig, ReportConfigVO.class);
+            }
+            if (reportConfigVO != null) {
+                archiveFile(reportConfigVO);
+                ReportConfigVO config = ToolSettings.getReportConfig();
+                config.copy(reportConfigVO);
+                runSchedule();
+                NoticeUtil.info("初始化成功");
+            }
+        } catch (Exception ex) {
+            NoticeUtil.error(ex);
+        }
     }
 
     public void generationFile(ReportContext context, ReportConfigVO config) {
@@ -74,11 +98,9 @@ public class ReportGenerator extends GeneratorConfig {
     public void runSchedule() {
         try {
             ReportConfigVO config = ToolSettings.getReportConfig();
-            if (taskRun || config.filePath == null) {
+            if (taskRun || config.filePath == null && !Boolean.TRUE.equals(config.getOpen())) {
                 return;
             }
-            WanNianLiService wanNianLiService = new WanNianLiService();
-//            config.setWanNianLiVO(wanNianLiService.getApiResult());
             taskRun = true;
             long dayS = config.period == null ? 1000 : config.period;
             Date daytime = DateUtils.StrToDate("2022-05-20 09:00:00", DateUtils.YYYY_MM_DD_HH_MM_SS);
@@ -245,6 +267,30 @@ public class ReportGenerator extends GeneratorConfig {
             }
         } catch (IOException ex) {
             NoticeUtil.error(ex);
+        }
+    }
+
+
+    public String getReportConfig() {
+        StringBuffer sb = new StringBuffer();
+        try (InputStream in = ReportGenerator.class.getResourceAsStream("/setting/param.json")) {
+            Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+            int ch = 0;
+            while ((ch = reader.read()) != -1) {
+                sb.append((char) ch);
+            }
+        } catch (Exception e) {
+            NoticeUtil.error(e);
+        }
+        return sb.toString();
+    }
+
+    private void archiveFile(ReportConfigVO reportConfigVO) {
+        if (reportConfigVO.archive != null && reportConfigVO.archive.getIsarchive()) {
+            reportConfigVO.archive.getArchiveFilePath().forEach(filePath -> {
+                backupFile(reportConfigVO.filePath + filePath, reportConfigVO.filePath + reportConfigVO.archive.getArchivePath() + filePath);
+                FileUtils.delete(reportConfigVO.filePath + filePath);
+            });
         }
     }
 }

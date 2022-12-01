@@ -73,13 +73,18 @@ public class FileUtils {
     }
 
     public static void writeFile(String path, String fileStr) {
+        writeFile(path, fileStr, true);
+    }
+
+    public static void writeFile(String path, String fileStr, boolean append) {
         if (StringUtils.isEmpty(path) || StringUtils.isEmpty(fileStr)) {
             return;
         }
         BufferedWriter bw = null;
         try {
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, true), StandardCharsets.UTF_8));
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, append), StandardCharsets.UTF_8));
             bw.write(fileStr);
+            LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
         } catch (Exception e) {
             throw new RuntimeException(e.getLocalizedMessage(), e);
         } finally {
@@ -94,11 +99,7 @@ public class FileUtils {
     }
 
     public static void writeFileDelete(String path, String fileStr) {
-        File file = new File(path);
-        if (file.exists()) {
-            file.delete();
-        }
-        writeFile(path, fileStr);
+        writeFile(path, fileStr, false);
     }
 
     public static void delete(String path) {

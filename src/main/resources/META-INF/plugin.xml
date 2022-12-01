@@ -21,14 +21,13 @@
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.database</depends>
 
-    <idea-version since-build="193.5233.102"/>
+    <idea-version since-build="212.5284.40"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.idea.plugin.setting.ToolSettings"/>
         <projectConfigurable dynamic="true" id="Generate。Code" groupId="tools" displayName="Generate Code" instance="com.idea.plugin.window.SettingFactory"/>
         <typedHandler implementation="com.idea.plugin.charreplace.ChineseCharReplaceHandler" id="ChineseCharReplaceHandler"/>
         <editorActionHandler action="EditorPaste" implementationClass="com.idea.plugin.image.PasteImageHandler" order="first"/>
-        <completion.contributor language="MARKDOWN" order="first" implementationClass="com.idea.plugin.completion.CodeCompletionContributor"/>
     </extensions>
 
     <actions>
@@ -48,10 +47,6 @@
             <action id="WordChangeAction" class="com.idea.plugin.popup.WordChangeAction"
                     text="WordChange" description="Word operation action" icon="/img/icon-string.svg">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift X"/>
-            </action>
-            <action id="ReportAction" class="com.idea.plugin.popup.ReportAction"
-                    text="Report" description="Create report file" icon="/img/icon-report.svg">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
             </action>
             <action id="GenerateAllDataAction" class="com.idea.plugin.popup.GenerateAllDataAction"
                     text="GenerateAllData" description="Generate all data action" icon="/img/icon-set.svg">
@@ -73,11 +68,20 @@
                     text="TextFormat" description="Text format" icon="/img/icon-json.svg">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift J"/>
             </action>
+            <action id="InitAction" class="com.idea.plugin.popup.InitAction"
+                    text="InitSetting" description="Init setting" icon="/img/icon-report.svg">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift P"/>
+            </action>
         </group>
         <action id="Copy Build File" class="com.idea.plugin.popup.CopyBuildFileAction" text="Copy Build File"
                 description="Copy Build File">
             <add-to-group group-id="CopyReferencePopupGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift C"/>
+        </action>
+        <action id="GitNewFeatureBranchAction" class="com.idea.plugin.popup.GitNewFeatureBranchAction" text="New Feature Branch"
+                description="New feature branch">
+            <add-to-group group-id="ChangesViewPopupMenu" anchor="after" relative-to-action="ChangesView.AddUnversioned"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F"/>
         </action>
         <group id="GenerateCode.group" text="Coding Easier"
                description="Coding Easier plugin"

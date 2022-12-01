@@ -326,8 +326,8 @@ public class Json5Generator {
         Json5Writer writer = Json5Writer.json5(stringWriter);
         writer.setIndent("  ");
         // 根注释
-        if (json5Comment.containsKey("rootComment")) {
-            COMMENT.accept(writer, json5Comment.get("rootComment"));
+        if (json5Comment.containsKey("JsonRoot")) {
+            COMMENT.accept(writer, json5Comment.get("JsonRoot"));
         } else {
             COMMENT.accept(writer, rootComment.trim());
         }

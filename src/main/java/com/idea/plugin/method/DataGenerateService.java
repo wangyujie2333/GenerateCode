@@ -1,4 +1,4 @@
-package com.idea.plugin.methodgenerate;
+package com.idea.plugin.method;
 
 import com.idea.plugin.document.WriterService;
 import com.idea.plugin.document.support.ClazzInfoVO;

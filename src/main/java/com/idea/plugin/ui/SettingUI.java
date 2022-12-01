@@ -62,6 +62,7 @@ public class SettingUI {
         removeTranslate.addActionListener(e -> {
             translateConfig.wordTypeEnum = WordTypeEnum.TRANSLATE;
             translateConfig.cacheMap = new ConcurrentHashMap<>();
+            ToolSettings.getReportConfig().setOpen(null);
             Messages.showMessageDialog("success", "正确", Messages.getInformationIcon());
         });
         replaceCheckBox.addActionListener(e -> settingConfigVO.replace = replaceCheckBox.isSelected());

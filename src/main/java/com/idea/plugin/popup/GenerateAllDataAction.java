@@ -1,6 +1,6 @@
 package com.idea.plugin.popup;
 
-import com.idea.plugin.methodgenerate.DataGenerateService;
+import com.idea.plugin.method.DataGenerateService;
 import com.idea.plugin.orm.support.enums.FileTypeEnum;
 import com.idea.plugin.utils.NoticeUtil;
 import com.intellij.openapi.actionSystem.AnActionEvent;

@@ -1,6 +1,6 @@
-package com.idea.plugin.methodgenerate;
+package com.idea.plugin.method;
 
-import com.idea.plugin.methodgenerate.module.ObjectConfigDO;
+import com.idea.plugin.method.module.ObjectConfigDO;
 import com.idea.plugin.popup.module.ActionContext;
 import com.idea.plugin.utils.ClipboardUtils;
 import com.intellij.openapi.application.Application;

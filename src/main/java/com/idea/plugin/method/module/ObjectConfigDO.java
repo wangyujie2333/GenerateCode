@@ -1,4 +1,4 @@
-package com.idea.plugin.methodgenerate.module;
+package com.idea.plugin.method.module;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -113,10 +113,12 @@ public class TextFormatView extends JRootPane {
         mainMenu.setSelectedItem(0);
         jsonMenu = new ComboBox<>(new ToolMenu[]{
                 ToolMenu.JSON_FORMAT,
-                ToolMenu.JSON_COMPRESSION,
                 ToolMenu.JSON_DOC,
                 ToolMenu.JSON_KEY_DOC,
-                ToolMenu.KEY_DOC
+                ToolMenu.KEY_DOC,
+                ToolMenu.JSON_COMPRESSION,
+                ToolMenu.JSON_ESCAPE,
+                ToolMenu.JSON_UN_ESCAPE
         });
         jsonMenu.addItemListener(itemListener);
         jsonMenu.setVisible(false);
@@ -131,6 +133,9 @@ public class TextFormatView extends JRootPane {
         sqlMenu = new ComboBox<>(new ToolMenu[]{
                 ToolMenu.SQL_MYSQL,
                 ToolMenu.SQL_ORACLE,
+                ToolMenu.SQL_INSERT,
+                ToolMenu.SQL_INSERT_M,
+                ToolMenu.SQL_INSERT_O,
                 ToolMenu.SQL_LOG
         });
         sqlMenu.addItemListener(itemListener);
@@ -197,7 +202,7 @@ public class TextFormatView extends JRootPane {
             }
         } else if (isMenu(jsonMenu, menu)) {
             jsonMenu.setSelectedItem(menu);
-            if (menu.equals(ToolMenu.JSON_COMPRESSION)) {
+            if (menu.equals(ToolMenu.JSON_COMPRESSION) || menu.equals(ToolMenu.JSON_ESCAPE) || menu.equals(ToolMenu.JSON_UN_ESCAPE)) {
                 this.outputTextArea.setLineWrap(true);
             }
         } else if (isMenu(javaBeanMenu, menu)) {

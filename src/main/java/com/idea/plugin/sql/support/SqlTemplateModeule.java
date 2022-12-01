@@ -166,9 +166,9 @@ public class SqlTemplateModeule extends TemplateModule {
         columnNameDeclares.add("TABLE_ID");
         columnNameDeclares.addAll(Arrays.asList(columnNameArr));
         if (isMysql()) {
-            return columnNameDeclares.stream().map(columnName -> "    DECLARE V_" + columnName.trim() + StringUtil.getBlank(columnName.trim(), maxCode) + " VARCHAR(32);").collect(Collectors.joining("\n"));
+            return columnNameDeclares.stream().map(columnName -> "    DECLARE V_" + columnName.trim() + StringUtil.getBlank(columnName.trim(), maxCode) + " VARCHAR(1024);").collect(Collectors.joining("\n"));
         } else if (isOracle()) {
-            return columnNameDeclares.stream().map(columnName -> "    V_" + columnName.trim() + StringUtil.getBlank(columnName.trim(), maxCode) + " VARCHAR2(32);").collect(Collectors.joining("\n"));
+            return columnNameDeclares.stream().map(columnName -> "    V_" + columnName.trim() + StringUtil.getBlank(columnName.trim(), maxCode) + " VARCHAR2(1024);").collect(Collectors.joining("\n"));
         }
         return "";
     }

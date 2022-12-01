@@ -38,7 +38,7 @@ public class JsonUtil {
             return null;
         }
         if (json instanceof String) {
-            return prettyJson(fromJson(json.toString(), Map.class));
+            return prettyJson(fromJson(json.toString()));
         }
         try {
             return prettyGson.toJson(json);
@@ -166,15 +166,33 @@ public class JsonUtil {
 
 
     private static String getPrimitiveFieldStr(String fieldNameStr, List<String> fieldName, String key, JsonPrimitive jsonElement) {
-        JsonPrimitive jsonPrimitive = jsonElement;
-        String type = "String";
-        if (jsonPrimitive.isBoolean()) {
-            type = "Boolean";
-        } else if (jsonPrimitive.isNumber()) {
-            type = "BigDecimal";
-        }
+        String type = getPrimitiveType(jsonElement);
         fieldName.add(String.format(fieldNameStr, type, key));
         return type;
+    }
+
+    public static String getPrimitiveType(JsonPrimitive jsonElement) {
+        String type = "String";
+        if (jsonElement.isBoolean()) {
+            type = "Boolean";
+        } else if (jsonElement.isNumber()) {
+            type = "BigDecimal";
+        }
+        return type;
+    }
+
+    public static Object getPrimitiveValue(JsonPrimitive jsonElement) {
+        Object value;
+        if (jsonElement.isBoolean()) {
+            value = jsonElement.getAsBoolean();
+        } else if (jsonElement.isNumber()) {
+            value = jsonElement.getAsBigDecimal();
+        } else if (jsonElement.isJsonNull()) {
+            value = null;
+        } else {
+            value = jsonElement.getAsString();
+        }
+        return value;
     }
 
     private static String getSubFieldInfo(Map<String, Object> subMap) {
@@ -297,6 +315,19 @@ public class JsonUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Object fromJson(String json) {
+        Object object = null;
+        try {
+            object = JsonUtil.fromJson(json, JsonObject.class);
+        } catch (Exception e) {
+        }
+        try {
+            object = JsonUtil.fromJson(json, JsonArray.class);
+        } catch (Exception e) {
+        }
+        return object;
     }
 
     public static Boolean isJson(String json) {

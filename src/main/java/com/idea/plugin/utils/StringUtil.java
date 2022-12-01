@@ -2,6 +2,7 @@ package com.idea.plugin.utils;
 
 import com.idea.plugin.setting.template.TemplateTaskPathEnum;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -321,4 +322,9 @@ public class StringUtil {
         }
         return sb.toString();
     }
+
+    public static boolean isNumber(String text) {
+        return NumberUtils.isNumber(text.trim());
+    }
+
 }

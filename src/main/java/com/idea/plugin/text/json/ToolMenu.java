@@ -1,6 +1,7 @@
 package com.idea.plugin.text.json;
 
-import com.google.gson.JsonObject;
+import com.idea.plugin.sql.mysql.MysqlProcedureInsertData;
+import com.idea.plugin.sql.oracle.OracleProcedureInsertData;
 import com.idea.plugin.text.json.json5.Json5Reader;
 import com.idea.plugin.text.mybatis.LogParser;
 import com.idea.plugin.text.mybatis.SqlFormatter;
@@ -9,6 +10,7 @@ import com.idea.plugin.utils.JsonUtil;
 import com.idea.plugin.utils.NoticeUtil;
 import com.idea.plugin.utils.StringUtil;
 import com.intellij.ui.JBColor;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextArea;
@@ -50,6 +52,35 @@ public enum ToolMenu {
             }
         }
     },
+    JSON_ESCAPE("Escape", ConvertType.JSON) {
+        @Override
+        public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
+            try {
+                String json;
+                if (JsonUtil.isJson(input.getText())) {
+                    json = StringEscapeUtils.escapeJava(JsonUtil.toJson(input.getText()));
+                } else {
+                    json = StringEscapeUtils.escapeJava(input.getText());
+                }
+                output.setText(json);
+                output.setCaretPosition(0);
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
+            }
+        }
+    },
+    JSON_UN_ESCAPE("Unescape", ConvertType.JSON) {
+        @Override
+        public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
+            try {
+                String json = StringEscapeUtils.unescapeJava(input.getText());
+                output.setText(json);
+                output.setCaretPosition(0);
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
+            }
+        }
+    },
     JSON_DOC("FormatDoc", ConvertType.JSON) {
         @Override
         public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
@@ -66,7 +97,7 @@ public enum ToolMenu {
         @Override
         public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
             try {
-                JsonObject jsonObject = Json5Reader.getFormatKeyDoc(input.getText());
+                Object jsonObject = Json5Reader.getFormatKeyDoc(input.getText());
                 String json = JsonUtil.prettyJson(jsonObject);
                 output.setText(json);
                 output.setCaretPosition(0);
@@ -88,7 +119,7 @@ public enum ToolMenu {
         }
     },
     SQL("Sql", null),
-    SQL_MYSQL("Mysql", ConvertType.SQL) {
+    SQL_MYSQL("MysqTable", ConvertType.SQL) {
         @Override
         public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
             try {
@@ -100,12 +131,51 @@ public enum ToolMenu {
             }
         }
     },
-    SQL_ORACLE("Oracle", ConvertType.SQL) {
+    SQL_ORACLE("OracleTable", ConvertType.SQL) {
         @Override
         public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
             try {
                 String ddl = Json5Reader.getOracleDDL(input.getText());
                 output.setText(ddl);
+                output.setCaretPosition(0);
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
+            }
+        }
+    },
+    SQL_INSERT("SqlInsert", ConvertType.SQL) {
+        @Override
+        public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
+            try {
+                String procedure = "INSERT INTO %s (%s) \nVALUES (%s);\n";
+                String dml = Json5Reader.getInsertDML(input.getText(), procedure, SQL_INSERT);
+                output.setText(dml);
+                output.setCaretPosition(0);
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
+            }
+        }
+    },
+    SQL_INSERT_M("MysqlInsert", ConvertType.SQL) {
+        @Override
+        public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
+            try {
+                String procedure = MysqlProcedureInsertData.insertDataProcedure;
+                String dml = Json5Reader.getInsertDML(input.getText(), procedure, SQL_INSERT_M);
+                output.setText(dml);
+                output.setCaretPosition(0);
+            } catch (Exception ex) {
+                setJsonSyntaxException(input, ex);
+            }
+        }
+    },
+    SQL_INSERT_O("OracleInsert", ConvertType.SQL) {
+        @Override
+        public void handle(RSyntaxTextArea input, RSyntaxTextArea output) {
+            try {
+                String procedure = OracleProcedureInsertData.insertDataProcedure;
+                String dml = Json5Reader.getInsertDML(input.getText(), procedure, SQL_INSERT_O);
+                output.setText(dml);
                 output.setCaretPosition(0);
             } catch (Exception ex) {
                 setJsonSyntaxException(input, ex);

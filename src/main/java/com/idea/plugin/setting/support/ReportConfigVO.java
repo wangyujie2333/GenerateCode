@@ -1,6 +1,5 @@
 package com.idea.plugin.setting.support;
 
-import com.idea.plugin.api.WanNianLiVO;
 import com.idea.plugin.report.support.enums.ReportTypeEnum;
 import com.idea.plugin.setting.ToolSettings;
 import com.idea.plugin.setting.template.*;
@@ -16,6 +15,8 @@ import java.util.stream.Collectors;
 public class ReportConfigVO extends BaseConfigVO {
 
     public String author;
+
+    private Boolean open;
     public Long period;
     public String filePath;
     public String backupfromPath;
@@ -32,10 +33,7 @@ public class ReportConfigVO extends BaseConfigVO {
     public Map<String, String> wordTemplate;
     public Map<String, String> wordTranslate;
     private Setting setting;
-
-
-    public WanNianLiVO wanNianLiVO;
-
+    private GitSetting gitSetting;
 
     public ReportConfigVO() {
     }
@@ -64,13 +62,21 @@ public class ReportConfigVO extends BaseConfigVO {
             wordTranslate = JsonUtil.fromJson(FileUtils.readFileStr(config.filePath + subTemplate.wordTranslate), Map.class);
         }
         if (setting != null) {
-            TranslateConfigVO translateConfig = ToolSettings.getTranslateConfig();
+            if (setting.getCopyFile() != null) {
+                CopyBuildConfigVO copyBuildConfig = ToolSettings.getCopyBuildConfig();
+                copyBuildConfig.setSourceCode(setting.getCopyFile().getSourceCode());
+                if (StringUtils.isEmpty(copyBuildConfig.filePathCache)) {
+                    copyBuildConfig.setFilePathCache(setting.getCopyFile().getFilePathCache());
+                    copyBuildConfig.setFolderName(setting.getCopyFile().getFolderName());
+                }
+            }
             if (setting.getReplace() != null) {
                 SettingConfigVO settingConfig = ToolSettings.getSettingConfig();
                 settingConfig.setReplace(setting.getReplace().getReplace());
                 settingConfig.setReplaceText(setting.getReplace().getReplaceText());
             }
             if (StringUtils.isNotEmpty(setting.getWordJsonMap())) {
+                TranslateConfigVO translateConfig = ToolSettings.getTranslateConfig();
                 String wordJson = Arrays.stream(setting.getWordJsonMap().split(";")).map(String::trim).distinct().collect(Collectors.joining("\n"));
                 wordJson = JsonUtil.propertyToJson(wordJson);
                 Map<String, String> wordTransMap = JsonUtil.fromJson(wordJson, Map.class);
@@ -195,23 +201,28 @@ public class ReportConfigVO extends BaseConfigVO {
         this.setting = setting;
     }
 
-    public WanNianLiVO getWanNianLiVO() {
-        if (wanNianLiVO == null) {
-            return new WanNianLiVO();
-        }
-        return wanNianLiVO;
+    public GitSetting getGitSetting() {
+        return gitSetting;
     }
 
-    public void setWanNianLiVO(WanNianLiVO wanNianLiVO) {
-        this.wanNianLiVO = wanNianLiVO;
+    public void setGitSetting(GitSetting gitSetting) {
+        this.gitSetting = gitSetting;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     public void setAuthor(String author) {
         this.author = author;
     }
 
-    public String getAuthor() {
-        return author;
+    public Boolean getOpen() {
+        return open;
+    }
+
+    public void setOpen(Boolean open) {
+        this.open = open;
     }
 
     public void setLogTemplate(LogTemplateVO logTemplate) {
@@ -224,11 +235,19 @@ public class ReportConfigVO extends BaseConfigVO {
 
 
     public static class Setting {
+        private CopyFile copyFile;
         private Replace replace;
         private String wordJsonMap;
 
-
         public Setting() {
+        }
+
+        public CopyFile getCopyFile() {
+            return copyFile;
+        }
+
+        public void setCopyFile(CopyFile copyFile) {
+            this.copyFile = copyFile;
         }
 
         public Replace getReplace() {
@@ -269,6 +288,78 @@ public class ReportConfigVO extends BaseConfigVO {
 
         public void setReplaceText(String replaceText) {
             this.replaceText = replaceText;
+        }
+    }
+
+    public static class CopyFile {
+        private Boolean sourceCode;
+        private String filePathCache;
+        private String folderName;
+
+        public CopyFile() {
+        }
+
+        public Boolean getSourceCode() {
+            return sourceCode;
+        }
+
+        public void setSourceCode(Boolean sourceCode) {
+            this.sourceCode = sourceCode;
+        }
+
+        public String getFilePathCache() {
+            return filePathCache;
+        }
+
+        public void setFilePathCache(String filePathCache) {
+            this.filePathCache = filePathCache;
+        }
+
+        public String getFolderName() {
+            return folderName;
+        }
+
+        public void setFolderName(String folderName) {
+            this.folderName = folderName;
+        }
+    }
+
+    public static class GitSetting {
+        private BranchKey branchKey;
+
+        public GitSetting() {
+        }
+
+        public BranchKey getBranchKey() {
+            return branchKey;
+        }
+
+        public void setBranchKey(BranchKey branchKey) {
+            this.branchKey = branchKey;
+        }
+    }
+
+    public static class BranchKey {
+        private String mfeature;
+        private String mbug;
+
+        public BranchKey() {
+        }
+
+        public String getMfeature() {
+            return mfeature;
+        }
+
+        public void setMfeature(String mfeature) {
+            this.mfeature = mfeature;
+        }
+
+        public String getMbug() {
+            return mbug;
+        }
+
+        public void setMbug(String mbug) {
+            this.mbug = mbug;
         }
     }
 }

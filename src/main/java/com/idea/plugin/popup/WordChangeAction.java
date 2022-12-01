@@ -4,6 +4,7 @@ import com.idea.plugin.setting.ToolSettings;
 import com.idea.plugin.setting.support.TranslateConfigVO;
 import com.idea.plugin.translator.TranslatorConfig;
 import com.idea.plugin.translator.TranslatorFactroy;
+import com.idea.plugin.utils.DateUtils;
 import com.idea.plugin.utils.NoticeUtil;
 import com.idea.plugin.utils.StringUtil;
 import com.idea.plugin.word.WordTypeEnum;
@@ -45,6 +46,7 @@ public class WordChangeAction extends BaseAction {
                         return;
                     }
                 }
+
                 String translate = TranslatorFactroy.translate(selectedText);
                 showPopupBalloon(selectedText, translate, strartOffset, endOffset);
             } else {
@@ -87,8 +89,25 @@ public class WordChangeAction extends BaseAction {
             final JBPopupFactory factory = JBPopupFactory.getInstance();
             List<String> resultList = new ArrayList<>();
             String lantype = TranslatorConfig.getLantype(selectText);
-            addWord(resultList, selectText, translate.trim(), lantype);
-            SelectListStep step = new SelectListStep(selectText + " 翻译结果", resultList, strartOffset, endOffset);
+            if (selectText.equals(translate)) {
+                String nowStr = DateUtils.nowDate(selectText);
+                if (nowStr != null) {
+                    resultList.add(nowStr);
+                } else {
+                    if (StringUtil.isNumber(selectText)) {
+                        resultList.add(String.valueOf(Long.parseLong(selectText) - 1));
+                        resultList.add(selectText);
+                        resultList.add(String.valueOf(Long.parseLong(selectText) + 1));
+                    }
+                }
+            } else {
+                addWord(resultList, selectText, translate.trim(), lantype);
+            }
+            String title = selectText;
+            if (selectText.length() > 10) {
+                title = selectText.substring(0, 10) + "...";
+            }
+            SelectListStep step = new SelectListStep(title + " 翻译结果", resultList, strartOffset, endOffset);
             step.setDefaultOptionIndex(0);
             ListPopup popup = factory.createListPopup(step, 20);
             popup.setRequestFocus(true);

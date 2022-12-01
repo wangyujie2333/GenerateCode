@@ -18,10 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class CopyFileService {
 
@@ -57,37 +54,43 @@ public class CopyFileService {
                 config.filePathCache = absolutePath;
             }
             absolutePath = absolutePath + "/" + folderName;
-            copyFiles(project, virtualFiles, absolutePath);
+            List<String> filePaths = new ArrayList<>();
+            copyFiles(project, virtualFiles, absolutePath, config.getSourceCode(), filePaths);
+            String pathtxt = absolutePath + "/增量地址.txt";
+            filePaths.addAll(FileTreeService.getFilePaths(FileUtils.readFile(pathtxt)));
+            List<FileTree> fileTrees = FileTreeService.getFileTrees(filePaths);
+            List<String> fileNameList = new ArrayList<>();
+            FileTreeService.printFileTree(fileTrees, fileNameList);
+            FileUtils.writeFile(pathtxt, String.join("\n", fileNameList), false);
             ZipUtils.fileToZip(absolutePath);
         } catch (Exception ex) {
             NoticeUtil.error("增量文件导入失败", ex);
         }
     }
 
-    private static void copyFiles(Project project, VirtualFile[] virtualFiles, String absolutePath) throws IOException {
+    private static void copyFiles(Project project, VirtualFile[] virtualFiles, String absolutePath, Boolean sourceCode, List<String> filePaths) throws IOException {
         for (VirtualFile virtualFile : virtualFiles) {
             if (virtualFile.isDirectory()) {
-                copyFiles(project, virtualFile.getChildren(), absolutePath);
+                copyFiles(project, virtualFile.getChildren(), absolutePath, sourceCode, filePaths);
             } else {
                 String filePath = virtualFile.getPath();
                 String fileType = virtualFile.getFileType().getName();
                 String fileName = virtualFile.getName();
                 FileTypeEnum fileTypeEnum = FileTypeEnum.codeToEnum(fileType);
-                String filePathStr = "";
                 String targetPath = "";
-                if (fileTypeEnum != null) {
+                String targetFileName = "";
+                if (!Boolean.TRUE.equals(sourceCode) && fileTypeEnum != null && filePath.contains("src/main/")) {
                     targetPath = filePath.replaceAll(fileTypeEnum.getPath(), "target/classes/");
-                    filePathStr = targetPath.substring(targetPath.lastIndexOf("target/classes/") + 15);
                     if (FileTypeEnum.JAVA.equals(fileTypeEnum)) {
                         targetPath = targetPath.replaceAll("\\.java", "\\.class");
-                        fileName = fileName.replaceAll("\\.java", "\\.class");
+                        targetFileName = fileName.replaceAll("\\.java", "\\.class");
                         int subClassNum = 1;
                         boolean hasSubClass = true;
                         while (hasSubClass) {
                             int i = targetPath.lastIndexOf(".");
                             String subTargetPath = targetPath.substring(0, i) + "$" + subClassNum + targetPath.substring(i);
-                            int j = fileName.lastIndexOf(".");
-                            String subFileName = fileName.substring(0, j) + "$" + subClassNum + fileName.substring(j);
+                            int j = targetFileName.lastIndexOf(".");
+                            String subFileName = targetFileName.substring(0, j) + "$" + subClassNum + targetFileName.substring(j);
                             File newfile = new File(subTargetPath);
                             if (newfile.exists()) {
                                 ++subClassNum;
@@ -99,29 +102,60 @@ public class CopyFileService {
                         }
                     }
                 }
-                VirtualFile dir = FileUtils.createDir(absolutePath);
-                File file = new File(targetPath);
-                String fileTime = "notclass";
-                if (file.exists()) {
-                    fileTime = DateUtils.DateToStr(new Date(file.lastModified()), DateUtils.YYYY_MM_DD_HH_MM_SS);
-                    FileUtils.copyFile(targetPath, dir.getPath() + "/" + fileName);
-                } else {
-                    Module[] modules = ModuleManager.getInstance(project).getModules();
-                    List<String> modulePaths = Arrays.stream(modules).map(ModuleUtil::getModuleDirPath).collect(Collectors.toList());
-                    String modulePath = modulePaths.stream().filter(filePath::contains).findAny().orElse("");
-                    filePathStr = filePath.replaceAll(modulePath, "");
-                    File file1 = new File(targetPath);
-                    if (file1.exists()) {
-                        fileTime = DateUtils.DateToStr(new Date(file1.lastModified()), DateUtils.YYYY_MM_DD_HH_MM_SS);
-                        FileUtils.copyFile(filePath, dir.getPath() + "/" + fileName);
-                    }
+                String fileTime = copyIncrementalFile(absolutePath, filePath, fileName, targetPath, targetFileName);
+                if (targetPath.endsWith(".class")) {
+                    filePath = filePath.replaceAll("\\.java", "\\.class");
                 }
-                String pathtxt = absolutePath + "/增量地址.txt";
-                if (!FileUtils.readFile(pathtxt).contains(filePathStr)) {
-                    FileUtils.writeFile(pathtxt, filePathStr + "\n");
-                }
+                String filePathStr = writeIncrementalAddress(project, filePath, filePaths);
                 NoticeUtil.info("增量文件导入成功-" + fileTime + "-" + filePathStr);
             }
+
         }
+    }
+
+    /**
+     * 复制增量文件
+     *
+     * @param absolutePath   绝对路径
+     * @param filePath       文件路径
+     * @param fileName       文件的名字
+     * @param targetPath     目标路径
+     * @param targetFileName 目标文件的名字
+     * @return {@link String}
+     * @throws IOException io异常
+     */
+    private static String copyIncrementalFile(String absolutePath, String filePath, String fileName, String targetPath, String targetFileName) throws IOException {
+        VirtualFile dir = FileUtils.createDir(absolutePath);
+        File file = new File(targetPath);
+        String fileTime = "notclass";
+        if (file.exists()) {
+            fileTime = DateUtils.DateToStr(new Date(file.lastModified()), DateUtils.YYYY_MM_DD_HH_MM_SS);
+            FileUtils.copyFile(targetPath, dir.getPath() + "/" + targetFileName);
+        } else {
+            File file1 = new File(filePath);
+            if (file1.exists()) {
+                fileTime = DateUtils.DateToStr(new Date(file1.lastModified()), DateUtils.YYYY_MM_DD_HH_MM_SS);
+                FileUtils.copyFile(filePath, dir.getPath() + "/" + fileName);
+            }
+        }
+        return fileTime;
+    }
+
+    /**
+     * 写增量地址
+     *
+     * @param project   项目
+     * @param filePath  文件路径
+     * @param filePaths
+     * @return {@link String}
+     */
+    private static String writeIncrementalAddress(Project project, String filePath, List<String> filePaths) {
+        Module[] modules = ModuleManager.getInstance(project).getModules();
+        Optional<Module> optionalModule = Arrays.stream(modules).filter(module -> filePath.contains(ModuleUtil.getModuleDirPath(module))).findAny();
+        String filePathStr = optionalModule.map(module -> filePath.substring(filePath.indexOf(module.getName())))
+                .orElseGet(() -> filePath.substring(filePath.indexOf(project.getBasePath()) + project.getBasePath().length()))
+                .replaceAll("target/classes/|src/main/java/|src/main/resources/","");
+        filePaths.add(filePathStr);
+        return filePathStr;
     }
 }
